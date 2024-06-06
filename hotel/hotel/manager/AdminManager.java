@@ -1,42 +1,91 @@
 package manager;
 
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.FileWriter;
 import java.time.LocalDate;
-import java.util.ArrayList;
+import java.time.format.DateTimeFormatter;
+import java.util.HashMap;
 
 import users.Admin;
 import users.Education;
+import users.Gender;
 
 public class AdminManager {
-	protected ArrayList<Admin> admins;
+	private static AdminManager instance;
+	protected HashMap<String, Admin> admins;
 	protected String fileName;
 	protected String filePath;
 	
+	public static AdminManager getInstance() {
+		if (instance == null) {
+			instance = new AdminManager();
+		}
+		return instance;
+	}
+	
+	
 	public AdminManager() {
-		admins = new ArrayList<Admin>();
-		fileName = "admins.txt";
+		admins = new HashMap<String, Admin>();
+		fileName = "admins.csv";
 		filePath = "data"+ System.getProperty("file.separator");
 	}
 	
 	public Admin find(String username) {
-		for (Admin admin : admins) {
-			if (admin.get_username().equals(username)) {
-				return admin;
+			if (admins.containsKey(username)) {
+				return admins.get(username);
+			} else {
+				return null;
 			}
-		}
-		System.out.println("Admin not found");
-		return null;
 	}
 	
-	public ArrayList<Admin> getAdmins() {
+	public HashMap<String, Admin> getAdmins() {
 		return admins;
 	}
+
+	public void add(String username, String password, String name, String surname, LocalDate dateOfBirth, int phoneNumber, Gender gender, Education education, int experience, double baseSalary) {
+		this.admins.put(username, new Admin(username, password, name, surname, dateOfBirth, phoneNumber, gender, education, experience, baseSalary));
+	}
 	
-	public void add(String username, String password, String name, String surname, LocalDate dateOfBirth, int phoneNumber, boolean male, Education education, int experience, double baseSalary) {
-		this.admins.add(new Admin(username, password, name, surname, dateOfBirth, phoneNumber, male, education, experience, baseSalary));
+	public void add(String username, String password, String name, String surname, LocalDate dateOfBirth, int phoneNumber, Gender gender, Education education, int experience, double baseSalary, Boolean deleted) {
+		this.admins.put(username, new Admin(username, password, name, surname, dateOfBirth, phoneNumber, gender, education, experience, baseSalary, deleted));
 	}
 	
 	public void remove(Admin admin) {
 		admin.delete();
+	}
+	
+	public void readData() {
+		try {
+			String line;
+			BufferedReader reader = new BufferedReader(new FileReader(filePath + fileName));
+			while ((line = reader.readLine()) != null) {
+				String[] data = line.split(",");
+				for (String string : data) {
+					this.add(data[0], data[1], data[2], data[3], LocalDate.parse(data[4]), Integer.parseInt(data[5]), Gender.valueOf(data[6]), Education.valueOf(data[7]), Integer.parseInt(data[8]), Double.parseDouble(data[9]), Boolean.parseBoolean(data[10]));
+				}
+			}
+			
+		} catch (FileNotFoundException e) {
+			System.out.println("File not found");
+		}
+		catch (Exception e) {
+			System.out.println("Error reading file" + fileName);
+		}
+	}
+	
+	public void writeData() {
+		try {
+			BufferedWriter writer = new BufferedWriter(new FileWriter(filePath + fileName));
+			for (Admin admin : admins.values()) {
+				writer.write(admin.getUsername() + "," + admin.getPassword() + "," + admin.getName() + "," + admin.getSurname() + "," + admin.getDateOfBirth().toString() + "," + String.valueOf(admin.getPhoneNumber()) + "," + String.valueOf(admin.getGender()) + "," + String.valueOf(admin.getEducationLevel()) + "," + String.valueOf(admin.getExperience()) + "," + String.valueOf(admin.getBaseSalary()) + "," + String.valueOf(admin.isDeleted()) + "\n");
+			}
+			// write data to file
+		} catch (Exception e) {
+			System.out.println("Error writing to file");
+		}
 	}
 	
 }

@@ -3,16 +3,30 @@ package rooms;
 public enum RoomStatus {
 	AVAILABLE, OCCUPIED, CLEANED;
 
-	public int getStatus(RoomStatus status) {
+	public static String getStatus(RoomStatus status) {
 		switch (status) {
 		case AVAILABLE:
-			return 1;
+			return "AVAILABLE";
 		case CLEANED:
-			return 2;
+			return "CLEANED";
 		case OCCUPIED:
-			return 3;
+			return "OCCUPIED";
 		default:
-			return 0;
+			return null;
 		}
 	}
+	
+	public static RoomStatus getStatus(String status) {
+		switch (status) {
+		case "AVAILABLE":
+			return AVAILABLE;
+		case "CLEANED":
+			return CLEANED;
+		case "OCCUPIED":
+			return OCCUPIED;
+		default:
+			return null;
+		}
+	}
+	
 }

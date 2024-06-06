@@ -1,65 +1,89 @@
 package hotel;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
+import java.util.HashMap;
 
-import manager.ServiceManager;
+
+
 import rooms.RoomType;
 
 public class PriceList {
 	protected LocalDate startDate;
 	protected LocalDate endDate;
-	protected ArrayList<Service> services;
-	protected double[] roomPrices;
+	protected HashMap<Service, Double> services;
+	protected HashMap<RoomType, Double> roomPrices;
 	protected boolean deleted;
+	protected int id;
 	
-	public PriceList(LocalDate startDate, LocalDate endDate) {
+	public PriceList(int id, LocalDate startDate, LocalDate endDate, HashMap<Service, Double> services, HashMap<RoomType, Double> roomPrices) {
 		this.startDate = startDate;
 		this.endDate = endDate;
-		this.services = new ArrayList<Service>();
+		this.services = services;
+		this.roomPrices = roomPrices;
+		this.id = id;
 		this.deleted = false;
-		this.roomPrices = new double[4];
 	}
 	
+	public PriceList(int id, LocalDate startDate, LocalDate endDate, HashMap<Service, Double> services, HashMap<RoomType, Double> roomPrices, boolean deleted) {
+		this.startDate = startDate;
+		this.endDate = endDate;
+		this.services = services;
+		this.deleted = false;
+		this.roomPrices = roomPrices;
+		this.id = id;
+		this.deleted = deleted;
+	}
+	
+	public int getId() {
+		return id;
+	}
+
+	public void setId(int id) {
+		this.id = id;
+	}
+
 	public void addRoomPrice(RoomType roomType,double price) {
-		roomPrices[roomType.getType(roomType)-1] = price;
+		this.roomPrices.put(roomType, price);
 	}
 	
 	public double getRoomPrice(RoomType roomType) {
-		return roomPrices[roomType.getType(roomType) - 1];
+		return roomPrices.get(roomType);
 	}
 	
 	public void changeRoomPrice(RoomType roomType, double price) {
-		roomPrices[roomType.getType(roomType) - 1] = price;
+		roomPrices.replace(roomType, price);
 	}
 	
 	public void addServicePrice(Service service, double price) {
-		service.setPrice(price);
-		this.services.add(service);
+		this.services.put(service, price);
 	}
 	
 	public void changeServicePrice(Service service, double price) {
-		service.setPrice(price);
+		this.services.replace(service, price);
+	}
+	
+	public double getServicePrice(Service service) {
+		return services.get(service);
 	}
 	
 	public void removeService(Service service) {
 		this.services.remove(service);
 	}
-	
-	public void setPrice(ServiceManager serviceManager,String type, double price) {
-		serviceManager.find(type).setPrice(price);
-	}
 
 	public LocalDate getStartDate() {
-		return startDate;
+		return this.startDate;
 	}
 	
 	public LocalDate getEndDate() {
-		return endDate;
+		return this.endDate;
 	}
 	
-	public ArrayList<Service> getServices() {
-		return services;
+	public HashMap<Service, Double> getServices() {
+		return this.services;
+	}
+	
+	public HashMap<RoomType, Double> getRoomPrices() {
+		return this.roomPrices;
 	}
 	
 	public void setStartDate(LocalDate startDate) {
@@ -71,10 +95,10 @@ public class PriceList {
 	}
 	
 	public boolean isDeleted() {
-		return deleted;
+		return this.deleted;
 	}
 	
 	public void delete() {
-		deleted = true;
+		this.deleted = true;
 	}
 }

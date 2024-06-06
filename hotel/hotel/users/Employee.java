@@ -3,42 +3,54 @@ package users;
 import java.time.LocalDate;
 
 public class Employee extends User{
-	private Education _educationLevel;
-	private int _experience;
-	private double _baseSalary;
+	private Education educationLevel;
+	private int experience;
+	private double baseSalary;
 	
-	Employee(String username, String password, String name, String surname, LocalDate dateOfBirth, int phoneNumber, boolean male, Education education, int experience, double baseSalary) {
-		super(username, password, name, surname, dateOfBirth, phoneNumber, male);
-		_educationLevel = education;
-		_experience = experience;
-		_baseSalary = baseSalary;
+	Employee(String username, String password, String name, String surname, LocalDate dateOfBirth, int phoneNumber, Gender gender, Education education, int experience, double baseSalary) {
+		super(username, password, name, surname, dateOfBirth, phoneNumber, gender);
+		this.educationLevel = education;
+		this.experience = experience;
+		this.baseSalary = baseSalary;
 	}
 
+	Employee(String username, String password, String name, String surname, LocalDate dateOfBirth, int phoneNumber, Gender gender, Education education, int experience, double baseSalary, boolean deleted) {
+		super(username, password, name, surname, dateOfBirth, phoneNumber, gender, deleted);
+		this.educationLevel = education;
+		this.experience = experience;
+		this.baseSalary = baseSalary;
+	}
+	
+	@Override
+	public String toString() {
+		return super.toString() + "," + this.educationLevel + "," + this.experience + "," + this.baseSalary;
+	}
+	
 	public double calculateSalary() {
-		return _baseSalary + _experience * 100 + _educationLevel.salaryBonus(_educationLevel) * 200;
+		return baseSalary + experience * 100 + educationLevel.salaryBonus(educationLevel) * 200;
 	}
 	
-	public int get_educationLevel() {
-		return _educationLevel.ordinal();
+	public Education getEducationLevel() {
+		return educationLevel;
 	}
 
-	public void set_educationLevel(Education _educationLevel) {
-		this._educationLevel = _educationLevel;
+	public void setEducationLevel(Education _educationLevel) {
+		this.educationLevel = _educationLevel;
 	}
 
-	public int get_experience() {
-		return _experience;
+	public int getExperience() {
+		return experience;
 	}
 
-	public void set_experience(int _experience) {
-		this._experience = _experience;
+	public void setExperience(int _experience) {
+		this.experience = _experience;
 	}
 
-	public double get_baseSalary() {
-		return _baseSalary;
+	public double getBaseSalary() {
+		return baseSalary;
 	}
 
-	public void set_baseSalary(int _baseSalary) {
-		this._baseSalary = _baseSalary;
+	public void setBaseSalary(int _baseSalary) {
+		this.baseSalary = _baseSalary;
 	}
 }

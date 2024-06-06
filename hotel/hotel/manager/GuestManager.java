@@ -1,41 +1,84 @@
 package manager;
 
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.FileReader;
+import java.io.FileWriter;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.HashMap;
 
+import users.Education;
+import users.Gender;
 import users.Guest;
 
 public class GuestManager {
-	ArrayList<Guest> guests;
-	String fileName;
-	String filePath;
+	private static GuestManager instance;
+	protected HashMap<String, Guest> guests;
+	protected String fileName;
+	protected String filePath;
+	
+	public static GuestManager getInstance() {
+		if (instance == null) {
+			instance = new GuestManager();
+		}
+		return instance;
+		
+	}
 	
 	public GuestManager() {
-		guests = new ArrayList<Guest>();
-		fileName = "guests.txt";
-		filePath = "data/";
+		this.guests = new HashMap<String, Guest>();
+		this.fileName = "guests.csv";
+		this.filePath = "data/";
 	}
 	
 	public Guest find(String username) {
-		for (Guest guest : guests) {
-			if (guest.get_username().equals(username)) {
-				return guest;
-			}
+		if (guests.containsKey(username)) {
+			return guests.get(username);
+		} else {
+			return null;
 		}
-		System.out.println("Guest not found");
-		return null;
 	}
 	
-	public ArrayList<Guest> getGuests() {
+	public HashMap<String, Guest> getGuests() {
 		return guests;
 	}
 	
-	public void add(String username, String password, String name, String surname, LocalDate dateOfBirth, int phoneNumber, boolean male) {
-		this.guests.add(new Guest(username, password, name, surname, dateOfBirth, phoneNumber, male));
+	public void add(String username, String password, String name, String surname, LocalDate dateOfBirth, int phoneNumber, Gender gender) {
+		this.guests.put(username, new Guest(username, password, name, surname, dateOfBirth, phoneNumber, gender));
+	}
+	
+	public void add(String username, String password, String name, String surname, LocalDate dateOfBirth, int phoneNumber, Gender gender, Boolean deleted) {
+		this.guests.put(username, new Guest(username, password, name, surname, dateOfBirth, phoneNumber, gender, deleted));
 	}
 	
 	public void remove(Guest guest) {
 		guest.delete();
+	}
+	
+	public void readData() {
+		try {
+			BufferedReader reader = new BufferedReader(new FileReader(filePath + fileName));
+			String line;
+			while ((line = reader.readLine()) != null) {
+                String[] data = line.split(",");
+				this.add(data[0], data[1], data[2], data[3], LocalDate.parse(data[4]), Integer.parseInt(data[5]), Gender.valueOf(data[6]), Boolean.valueOf(data[7]));
+			}
+		}catch (Exception e) {
+			System.out.println("Error reading file" + fileName);
+		}
+	
+	}
+	public void writeData() {
+		try {
+			BufferedWriter writer = new BufferedWriter(new FileWriter(filePath + fileName));
+			for (Guest guest : guests.values()) {
+				writer.write(guest.getUsername() + "," + guest.getPassword() + "," + guest.getName() + "," + guest.getSurname() + "," + guest.getDateOfBirth().toString() + "," + String.valueOf(guest.getPhoneNumber()) + "," + String.valueOf(guest.getGender()) + "," + String.valueOf(guest.isDeleted()) +"\n");
+			}
+			// write data to file
+		} catch (Exception e) {
+			System.out.println("Error writing to file");
+		}
 	}
 	
 	

@@ -17,4 +17,39 @@ public enum Education {
 	        	return 0;
 	    }
 	}
+	
+	public int getEducationLevel(Education education) {
+		return this.salaryBonus(education);
+	}
+	
+	public static String getEducation(Education education) {
+		switch (education) {
+		case HIGH_SCHOOL:
+			return "HIGH_SCHOOL";
+		case BACHELOR:
+			return "BACHELOR";
+		case MASTER:
+			return "MASTER";
+		case PHD:
+			return "PHD";
+		default:
+			return null;
+		}
+	}
+	
+	public static Education getEducation(String education) {
+		switch (education) {
+		case "HIGH_SCHOOL":
+			return HIGH_SCHOOL;
+		case "BACHELOR":
+			return BACHELOR;
+		case "MASTER":
+			return MASTER;
+		case "PHD":
+			return PHD;
+		default:
+			return null;
+		}
+	}
+	
 }

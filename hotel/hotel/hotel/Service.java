@@ -2,12 +2,16 @@ package hotel;
 
 public class Service {
 	protected String type;
-	protected double price;
 	protected boolean deleted;
 	
 	public Service(String type) {
 		this.type = type;
 		this.deleted = false;
+	}
+	
+	public Service(String type, boolean deleted) {
+		this.type = type;
+		this.deleted = deleted;
 	}
 	
 	public String getType() {
@@ -18,12 +22,8 @@ public class Service {
 		this.type = type;
 	}
 	
-	public void setPrice(double price) {
-		this.price = price;
-	}
-	
-	public double getPrice() {
-		return price;
+	public String toString() {
+		return type;
 	}
 	
 	public boolean isDeleted() {

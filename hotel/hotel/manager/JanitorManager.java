@@ -1,42 +1,86 @@
 package manager;
 
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.FileReader;
+import java.io.FileWriter;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 import users.Education;
+import users.Gender;
 import users.Janitor;
 
 public class JanitorManager {
-	ArrayList<Janitor> janitors;
-	String fileName;
-	String filePath;
+	private static JanitorManager instance;
+	protected HashMap<String, Janitor> janitors;
+	protected String fileName;
+	protected String filePath;
+	
+	public static JanitorManager getInstance() {
+		if (instance == null) {
+			instance = new JanitorManager();
+		}
+		return instance;
+	}
 	
 	public JanitorManager() {
-		janitors = new ArrayList<Janitor>();
-		fileName = "janitors.txt";
+		janitors = new HashMap<String, Janitor>();
+		fileName = "janitors.csv";
 		filePath = "data/";
 	}
 	
 	public Janitor find(String username) {
-		for (Janitor janitor : janitors) {
-			if (janitor.get_username().equals(username)) {
-				return janitor;
-			}
+		if (janitors.containsKey(username)) {
+			return janitors.get(username);
 		}
-		System.out.println("Janitor not found");
 		return null;
 	}
 	
-	public ArrayList<Janitor> getJanitors() {
+	public HashMap<String, Janitor> getJanitors() {
 		return janitors;
 	}
 	
-	public void add(String username, String password, String name, String surname, LocalDate dateOfBirth, int phoneNumber, boolean male, Education education, int experience, double baseSalary) {
-		this.janitors.add(new Janitor(username, password, name, surname, dateOfBirth, phoneNumber, male, education, experience, baseSalary));
+	public void add(String username, String password, String name, String surname, LocalDate dateOfBirth, int phoneNumber, Gender gender, Education education, int experience, double baseSalary) {
+		this.janitors.put(username ,new Janitor(username, password, name, surname, dateOfBirth, phoneNumber, gender, education, experience, baseSalary));
+	}
+	
+	public void add(String username, String password, String name, String surname, LocalDate dateOfBirth, int phoneNumber, Gender gender, Education education, int experience, double baseSalary, boolean deleted) {
+		this.janitors.put(username ,new Janitor(username, password, name, surname, dateOfBirth, phoneNumber, gender, education, experience, baseSalary, deleted));
 	}
 	
 	public void remove(Janitor janitor) {
 		janitor.delete();
 	}
+	
+	public void readData() {
+		try {
+			BufferedReader reader = new BufferedReader(new FileReader(filePath + fileName));
+			String line;
+			while ((line = reader.readLine()) != null) {
+                String[] data = line.split(",");
+				this.add(data[0], data[1], data[2], data[3], LocalDate.parse(data[4]), Integer.parseInt(data[5]), Gender.valueOf(data[6]), Education.valueOf(data[7]), Integer.parseInt(data[8]), Double.parseDouble(data[9]), Boolean.parseBoolean(data[10]));
+			}
+		}catch (Exception e) {
+			System.out.println("Error reading file" + fileName);
+		}
+	
+	}
+	
+	public void writeData() {
+		try {
+			BufferedWriter writer = new BufferedWriter(new FileWriter(filePath + fileName));
+			for (Janitor janitor : janitors.values()) {
+				writer.write(janitor.getUsername() + "," + janitor.getPassword() + "," + janitor.getName() + "," + janitor.getSurname() + "," + janitor.getDateOfBirth().toString() + "," + String.valueOf(janitor.getPhoneNumber()) + "," + String.valueOf(janitor.getGender()) + "," + String.valueOf(janitor.getEducationLevel()) + "," + String.valueOf(janitor.getExperience()) + "," + String.valueOf(janitor.getBaseSalary()) + "," + String.valueOf(janitor.isDeleted()) + "\n");
+			}
+			// write data to file
+		} catch (Exception e) {
+			System.out.println("Error writing to file");
+		}
+	}
+	
+
+	
 	
 }
