@@ -36,7 +36,7 @@ public class PriceListManager {
 	
 	public PriceList find(LocalDate startDate, LocalDate endDate) {
 		for (PriceList priceList : priceLists.values()) {
-			if (!priceList.getStartDate().isAfter(startDate) && !priceList.getEndDate().isBefore(endDate) && !priceList.isDeleted()) {
+			if (priceList.getStartDate().equals(startDate) && priceList.getEndDate().equals(endDate) && !priceList.isDeleted()) {
 				return priceList;
 			}
 		}

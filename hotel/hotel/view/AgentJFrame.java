@@ -459,6 +459,13 @@ public class AgentJFrame extends JFrame implements ActionListener{
 		});
 		
 		this.updateTablePanel();
+		
+		JButton buttonFilter = new JButton("Filter");
+		buttonFilter.setBounds(350,0, 100, 50);
+		upperPanel.add(buttonFilter);
+		buttonFilter.addActionListener(ActionEvent -> {
+			//TODO implement filter search
+		});
 			
 		JButton logoutButton = new JButton("Logout");
 		logoutButton.setBounds(960,0, 100, 50);
@@ -472,7 +479,6 @@ public class AgentJFrame extends JFrame implements ActionListener{
 	
 	
 	public void dailyOccupancyPage() {
-		// TODO implement daily occupancy		
 		JButton pickDateButton = new JButton("Pick date");
 		pickDateButton.setBounds(10,0, 100, 50);
 		upperPanel.add(pickDateButton);

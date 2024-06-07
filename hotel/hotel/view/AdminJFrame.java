@@ -12,6 +12,7 @@ import java.util.HashMap;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
@@ -22,6 +23,7 @@ import javax.swing.JTable;
 import javax.swing.JTextField;
 
 import hotel.PriceList;
+import hotel.Service;
 import manager.AdminManager;
 import manager.AgentManager;
 import manager.CleaningManager;
@@ -48,26 +50,55 @@ public class AdminJFrame extends JFrame implements ActionListener{
 	JMenuItem janitorsItem;
 	JMenuItem guestsItem;
 	
-	JMenuItem priceListItem;
 	JMenuItem earningsItem;
+	JMenuItem statisticsItem;
 	
 	JMenuItem cleaningListItem;
+	JMenuItem priceListItem;
 	JMenuItem roomListItem;
 	JMenuItem reservationListItem;
+	JMenuItem roomTypeListItem;
 	
 	String currentScreen = "admins";
 	JPanel upperPanel;
 	JPanel tablePanel;
 	JTable table;
+	JLabel error;
 	
 	ArrayList<String> data;
 	
-//	public JPanel tablePriceList() {
-//		JPanel tablePanel = new JPanel();
-//		JTable table = new JTable();
-//		String[] columnNames = {"Start Date", "End Date", "Room Type", "Service"};
-//		PriceListManager priceListManager = ManagerManager.priceListManager;		
-//	}
+	HashMap<Service, JTextField> servicePrices = new HashMap<Service, JTextField>();
+	HashMap<RoomType, JTextField> roomTypePrices = new HashMap<RoomType, JTextField>();
+	
+	public boolean validateInput() {
+		error.setText("");
+		boolean valid = true;
+		for (JTextField price : servicePrices.values()) {
+			if (price.getText().isEmpty()) {
+				valid = false;
+				error.setText("All service prices must be set");
+			} else if (Double.parseDouble(price.getText()) < 0) {
+				valid = false;
+				error.setText("Service prices must be positive");
+			}
+		}
+		
+		if (!valid) {
+			return valid;
+		}
+		
+		for (JTextField price : roomTypePrices.values()) {
+			if (price.getText().isEmpty()) {
+				valid = false;
+				error.setText("All room type prices must be set");
+			} else if (Double.parseDouble(price.getText()) < 0) {
+				valid = false;
+				error.setText("Room type prices must be positive");
+			}
+		}
+		
+		return valid;
+	}
 	
 	public JPanel tableUser() {
 		tablePanel = new JPanel();
@@ -208,6 +239,26 @@ public class AdminJFrame extends JFrame implements ActionListener{
 		tablePanel.add(scrollPane);
 		return tablePanel;
 		
+	}
+	
+	public JPanel tableRoomTypes() {
+		tablePanel = new JPanel();
+		table = new JTable();
+		table.setDefaultEditor(Object.class, null);
+		String[] columnNames = { "Type", "Capacity" };
+		HashMap<String, RoomType> roomTypes = ManagerManager.getRoomTypeManager().getAvailableRoomTypes();
+		String[][] data = new String[roomTypes.size()][2];
+		int i = 0;
+		for (RoomType roomType : roomTypes.values()) {
+			data[i][0] = roomType.getType();
+			data[i][1] = String.valueOf(roomType.getCapacity());
+			i++;
+		}
+		table = new JTable(data, columnNames);
+		JScrollPane scrollPane = new JScrollPane(table);
+		scrollPane.setPreferredSize(new Dimension(900, 800));
+		tablePanel.add(scrollPane);
+		return tablePanel;
 	}
 	
 	public JPanel tableEarnings(LocalDate startDate, LocalDate endDate) {
@@ -461,6 +512,13 @@ public class AdminJFrame extends JFrame implements ActionListener{
 			this.setVisible(true);
 		});
 		
+		JButton earningChart = new JButton("Earning Chart");
+		earningChart.setBounds(240,0, 150, 50);
+		upperPanel.add(earningChart);
+		earningChart.addActionListener(ActionEvent -> {
+			//TODO: implement chart 
+		});
+
 		JButton monthlyEarnings = new JButton("Monthly Earnings");
 		monthlyEarnings.setBounds(120,0, 150, 50);
 		upperPanel.add(monthlyEarnings);
@@ -620,37 +678,6 @@ public class AdminJFrame extends JFrame implements ActionListener{
             }
 		});
 		
-		JButton addRoomType = new JButton("Add Room Type");
-		addRoomType.setBounds(340,0, 150, 50);
-		upperPanel.add(addRoomType);
-		addRoomType.addActionListener(ActionEvent -> {
-			JFrame addRoomTypeFrame = new JFrame();
-			JPanel addRoomTypePanel = new JPanel();
-			addRoomTypeFrame.add(addRoomTypePanel);
-			addRoomTypePanel.setBorder(javax.swing.BorderFactory.createTitledBorder("Add Room Type"));
-			JTextField roomTypeTextField = new JTextField();
-			roomTypeTextField.setPreferredSize(new Dimension(200, 30));
-			roomTypeTextField.setFont(new java.awt.Font("Tahoma", 1, 25));
-			addRoomTypePanel.add(roomTypeTextField);
-			JPanel addRoomCapacityPanel = new JPanel();
-			JTextField capacityTextField = new JTextField();
-			capacityTextField.setPreferredSize(new Dimension(200, 30));
-			capacityTextField.setFont(new java.awt.Font("Tahoma", 1, 25));
-			addRoomCapacityPanel.setBorder(javax.swing.BorderFactory.createTitledBorder("Capacity"));
-			addRoomCapacityPanel.add(capacityTextField);
-			addRoomTypeFrame.add(addRoomCapacityPanel);
-			JButton buttonSubmit = new JButton("Submit");
-			addRoomTypeFrame.add(buttonSubmit);
-			buttonSubmit.addActionListener(ActionEvent2 -> {
-				ManagerManager.getRoomTypeManager().add(String.valueOf(roomTypeTextField.getText()), Integer.parseInt(capacityTextField.getText()));
-				addRoomTypeFrame.dispose();
-			});
-			addRoomTypeFrame.setLayout(new GridLayout(3, 1));
-			addRoomTypeFrame.setSize(300, 300);
-			addRoomTypeFrame.setLocationRelativeTo(null);
-			addRoomTypeFrame.setVisible(true);
-		});
-		
 		JButton deleteRoom = new JButton("Delete");
 		deleteRoom.setBounds(850, 0, 100, 50);
 		upperPanel.add(deleteRoom);
@@ -675,6 +702,104 @@ public class AdminJFrame extends JFrame implements ActionListener{
 		updateTablePanel();
 	}
 	
+	public void roomTypePage() {
+		JButton addRoomType = new JButton("Add Room Type");
+		addRoomType.setBounds(340,0, 150, 50);
+		upperPanel.add(addRoomType);
+		addRoomType.addActionListener(ActionEvent -> {
+			JFrame addRoomTypeFrame = new JFrame();
+			JPanel addRoomTypePanel = new JPanel();
+			addRoomTypeFrame.add(addRoomTypePanel);
+			addRoomTypePanel.setBorder(javax.swing.BorderFactory.createTitledBorder("Add Room Type"));
+			JTextField roomTypeTextField = new JTextField();
+			roomTypeTextField.setPreferredSize(new Dimension(200, 30));
+			roomTypeTextField.setFont(new java.awt.Font("Tahoma", 1, 25));
+			addRoomTypePanel.add(roomTypeTextField);
+			JPanel addRoomCapacityPanel = new JPanel();
+			JTextField capacityTextField = new JTextField();
+			capacityTextField.setPreferredSize(new Dimension(200, 30));
+			capacityTextField.setFont(new java.awt.Font("Tahoma", 1, 25));
+			addRoomCapacityPanel.setBorder(javax.swing.BorderFactory.createTitledBorder("Capacity"));
+			addRoomCapacityPanel.add(capacityTextField);
+			addRoomTypeFrame.add(addRoomCapacityPanel);
+			JPanel buttonPanel = new JPanel();
+			buttonPanel.setLayout(new GridLayout(2, 1));
+			error = new JLabel("");
+			error.setFont(new java.awt.Font("Tahoma", 1, 25));
+			error.setForeground(java.awt.Color.red);
+			error.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+			buttonPanel.add(error);
+			JButton buttonSubmit = new JButton("Submit");
+			buttonPanel.add(buttonSubmit);
+			addRoomTypeFrame.add(buttonPanel);
+			buttonSubmit.addActionListener(ActionEvent2 -> {
+				if (roomTypeTextField.getText().isEmpty()) {
+					error.setText("Room type must be set");
+					return;
+				}
+				if (capacityTextField.getText().isEmpty()) {
+					error.setText("Capacity must be set");
+					return;
+			    }
+				try {
+					Integer.parseInt(capacityTextField.getText());
+				} catch (NumberFormatException e) {
+					error.setText("Capacity must be a number");
+					return;
+				}
+				
+				ManagerManager.getRoomTypeManager().add(String.valueOf(roomTypeTextField.getText()), Integer.parseInt(capacityTextField.getText()));
+				addRoomTypeFrame.dispose();
+			});
+			addRoomTypeFrame.setLayout(new GridLayout(3, 1));
+			addRoomTypeFrame.setSize(400, 300);
+			addRoomTypeFrame.setLocationRelativeTo(null);
+			addRoomTypeFrame.setVisible(true);	
+		});
+		
+		JButton buttonRefresh = new JButton("Refresh");
+		buttonRefresh.setBounds(10,0, 100, 50);
+		upperPanel.add(buttonRefresh);
+		buttonRefresh.addActionListener(ActionEvent -> {
+			this.remove(tablePanel);
+			tablePanel = new JPanel();
+			this.tableRoomTypes();
+			this.add(tablePanel, BorderLayout.CENTER);
+			this.repaint();
+			this.setVisible(true);
+		});
+		
+		JButton deleteRoomType = new JButton("Delete");
+		deleteRoomType.setBounds(850, 0, 100, 50);
+		upperPanel.add(deleteRoomType);
+		deleteRoomType.addActionListener(ActionEvent -> {
+			int reply = JOptionPane.showConfirmDialog(null, "Are you sure you want to delete this Room Type?");
+			if (reply == JOptionPane.YES_OPTION) {	
+				int row = table.getSelectedRow();
+				String roomType = String.valueOf(table.getValueAt(row, 0));
+				RoomType roomTypeToDelete = ManagerManager.getRoomTypeManager().getRoomType(roomType);
+				roomTypeToDelete.delete();
+				RoomManager roomManager = ManagerManager.getRoomManager();
+				for (Room room : roomManager.getRooms().values()) {
+					if (room.getType().equals(roomTypeToDelete)) {
+						room.delete();
+					}
+				}
+			}
+		});
+	
+		JButton logoutButton = new JButton("Logout");
+		logoutButton.setBounds(960,0, 100, 50);
+		logoutButton.addActionListener(ActionEvent -> {
+	        this.dispose();
+	        new LoginJFrame(managerManager);
+	    });
+		upperPanel.add(logoutButton);
+		
+		updateTablePanel();
+		
+	}
+	
 	public void priceListPage() {
 		JButton buttonRefresh = new JButton("Refresh");
 		buttonRefresh.setBounds(10,0, 100, 50);
@@ -691,14 +816,87 @@ public class AdminJFrame extends JFrame implements ActionListener{
 		JButton addPriceList = new JButton("Add new");
 		addPriceList.setBounds(120,0, 100, 50);
 		addPriceList.addActionListener(ActionEvent -> {
-			new AddPriceList(managerManager);
+			ArrayList<String> data = new ArrayList<String>();
+			new AddPriceList(managerManager,data);
 		});
 		upperPanel.add(addPriceList);
 		
 		JButton editPriceList = new JButton("Edit");
 		editPriceList.setBounds(230,0, 100, 50);
 		upperPanel.add(editPriceList);
-		//TODO: Implement edit priceList
+		editPriceList.addActionListener(ActionEvent -> {
+			try {
+				int row = table.getSelectedRow();
+				PriceList priceList = ManagerManager.getPriceListManager().find(LocalDate.parse(String.valueOf(table.getValueAt(row, 0))), LocalDate.parse(String.valueOf(table.getValueAt(row, 1))));
+				JFrame changePriceListFrame = new JFrame();
+				JPanel services = new JPanel();
+				services.setBorder(javax.swing.BorderFactory.createTitledBorder("Services"));
+				services.setLayout(new GridLayout(2, ManagerManager.getServiceManager().getActiveServices().size()/2));
+				for (Service service :	priceList.getServices().keySet()) {
+					JPanel priceService = new JPanel();
+					priceService.setBorder(javax.swing.BorderFactory.createTitledBorder(service.getType()));
+					JTextField priceField = new JTextField();
+					priceField.setText(String.valueOf(priceList.getServicePrice(service)));
+					priceField.setPreferredSize(new java.awt.Dimension(200, 30));
+					servicePrices.put(service, priceField);
+					priceService.add(priceField);
+					services.add(priceService);
+				}
+				changePriceListFrame.add(services);
+				
+				JPanel rooms = new JPanel();
+				rooms.setBorder(javax.swing.BorderFactory.createTitledBorder("Room Types"));
+				rooms.setLayout(new GridLayout(2, ManagerManager.getRoomTypeManager().getAvailableRoomTypes().size()/2));
+				for (RoomType roomType : ManagerManager.getRoomTypeManager().getAvailableRoomTypes().values()) {
+					JPanel priceRoomType = new JPanel();
+					priceRoomType.setBorder(javax.swing.BorderFactory.createTitledBorder(roomType.getType()));
+					JTextField priceField = new JTextField();
+					priceField.setText(String.valueOf(priceList.getRoomPrice(roomType)));
+					priceField.setPreferredSize(new java.awt.Dimension(200, 30));
+					roomTypePrices.put(roomType, priceField);
+					priceRoomType.add(priceField);
+					rooms.add(priceRoomType);
+				}
+				changePriceListFrame.add(rooms);
+				
+				JPanel buttonPanel = new JPanel();
+				buttonPanel.setLayout(new GridLayout(2, 1));
+				error = new JLabel("");
+			    error.setFont(new java.awt.Font("Tahoma", 1, 25));
+			    error.setForeground(java.awt.Color.red);
+			    error.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+			    buttonPanel.add(error);
+				JButton buttonSubmit = new JButton("Submit");
+				buttonPanel.add(buttonSubmit);
+				changePriceListFrame.add(buttonPanel);
+				buttonSubmit.addActionListener(ActionEvent2 -> {
+					if (validateInput()) {
+						for (Service service : servicePrices.keySet()) {
+							priceList.changeServicePrice(service, Double.parseDouble(servicePrices.get(service).getText()));
+						}
+						for (RoomType roomType : roomTypePrices.keySet()) {
+							priceList.changeRoomPrice(roomType, Double.parseDouble(roomTypePrices.get(roomType).getText()));
+						}
+						changePriceListFrame.dispose();			
+						this.remove(tablePanel);
+						tablePanel = new JPanel();
+						this.tablePriceList();
+						this.add(tablePanel, BorderLayout.CENTER);
+						this.repaint();
+						this.setVisible(true);
+					}
+				});
+				
+				changePriceListFrame.setLayout(new GridLayout(3, 1));
+				changePriceListFrame.setSize(500, 500);
+				changePriceListFrame.setLocationRelativeTo(null);
+				changePriceListFrame.setVisible(true);
+				
+				
+			} catch (Exception e) {
+				JOptionPane.showMessageDialog(null, "Please select a row to edit");
+			}
+		});
 		
 		JButton deletePriceList = new JButton("Delete");
 		deletePriceList.setBounds(850, 0, 100, 50);
@@ -722,7 +920,7 @@ public class AdminJFrame extends JFrame implements ActionListener{
 	    });
 		upperPanel.add(logoutButton);
 		
-		updateTablePanel();
+		tablePanel = new JPanel();
 	};
 	
 	public void cleaningListPage() {
@@ -776,6 +974,62 @@ public class AdminJFrame extends JFrame implements ActionListener{
 		updateTablePanel();
 	}
 	
+	public void statisticsPage() {
+		JButton buttonRefresh = new JButton("Refresh");
+		buttonRefresh.setBounds(10,0, 100, 50);
+		upperPanel.add(buttonRefresh);
+		buttonRefresh.addActionListener(ActionEvent -> {
+			//TODO: implement refresh
+			this.repaint();
+		});
+		
+		JButton janitorStats = new JButton("Janitor Statistics");
+		janitorStats.setBounds(120,0, 150, 50);
+		upperPanel.add(janitorStats);
+		janitorStats.addActionListener(ActionEvent -> {
+			//TODO: implement janitor statistics
+		});
+		
+		JButton reservationStats = new JButton("Reservation Statistics");
+		reservationStats.setBounds(280,0, 150, 50);
+		upperPanel.add(reservationStats);
+		reservationStats.addActionListener(ActionEvent -> {
+			//TODO: implement reservation statistics
+		});
+		
+		JButton roomStats = new JButton("Room Statistics");
+		roomStats.setBounds(440,0, 150, 50);
+		upperPanel.add(roomStats);
+		roomStats.addActionListener(ActionEvent -> {
+			//TODO: implement room statistics
+		});
+		
+		JButton janitorGraph = new JButton("Janitor Graph");
+		janitorGraph.setBounds(600,0, 150, 50);
+		upperPanel.add(janitorGraph);
+		janitorGraph.addActionListener(ActionEvent -> {
+			//TODO: implement janitor graph
+		});
+		
+		JButton reservationGraph = new JButton("Reservation Graph");
+		reservationGraph.setBounds(760,0, 150, 50);
+		upperPanel.add(reservationGraph);
+		reservationGraph.addActionListener(ActionEvent -> {
+			//TODO: implement reservation graph
+		});
+		
+		JButton logoutButton = new JButton("Logout");
+		logoutButton.setBounds(960, 0, 100, 50);
+		logoutButton.addActionListener(ActionEvent -> {
+			this.dispose();
+			new LoginJFrame(managerManager);
+		});
+		upperPanel.add(logoutButton);
+		
+		updateTablePanel();
+
+	}
+	
 	public AdminJFrame(ManagerManager managerManager) {
 		
 		this.managerManager = managerManager;
@@ -801,19 +1055,23 @@ public class AdminJFrame extends JFrame implements ActionListener{
 		
 		menuBar.add(usersMenu);
 		
-		JMenu financesMenu = new JMenu("Finances");
-
-		priceListItem = new JMenuItem("Price List");
-		priceListItem.addActionListener(this);
-		financesMenu.add(priceListItem);
+		JMenu statisticsMenu = new JMenu("Statistics");
 		
 		earningsItem = new JMenuItem("Earnings");
 		earningsItem.addActionListener(this);
-		financesMenu.add(earningsItem);
+		statisticsMenu.add(earningsItem);
 		
-		menuBar.add(financesMenu);
+		statisticsItem = new JMenuItem("Statistics");
+		statisticsItem.addActionListener(this);
+		statisticsMenu.add(statisticsItem);
+		
+		menuBar.add(statisticsMenu);
 		
 		JMenu hotelMenu = new JMenu("Hotel");
+		
+		priceListItem = new JMenuItem("Price List");
+		priceListItem.addActionListener(this);
+		hotelMenu.add(priceListItem);
 		
 		cleaningListItem = new JMenuItem("Cleaning List");
 		cleaningListItem.addActionListener(this);
@@ -826,6 +1084,10 @@ public class AdminJFrame extends JFrame implements ActionListener{
 		reservationListItem = new JMenuItem("Reservations");
 		reservationListItem.addActionListener(this);
 		hotelMenu.add(reservationListItem);
+		
+		roomTypeListItem = new JMenuItem("Room Types");
+		roomTypeListItem.addActionListener(this);
+		hotelMenu.add(roomTypeListItem);
 		
 		menuBar.add(hotelMenu);
 		
@@ -868,6 +1130,8 @@ public class AdminJFrame extends JFrame implements ActionListener{
 			tablePanel = this.tablePriceList();
 		} else if (currentScreen == "reservations") {
             tablePanel = this.tableReservations();
+		} else if (currentScreen == "roomTypes") {
+			tablePanel = this.tableRoomTypes();
 		} else {
 			tablePanel = this.tableUser();
 		}
@@ -896,6 +1160,10 @@ public class AdminJFrame extends JFrame implements ActionListener{
 			this.roomsPage();
 		} else if (currentScreen == "reservations") {
 			this.reservationsPage();
+		} else if (currentScreen == "roomTypes") {
+			this.roomTypePage();
+		} else if (currentScreen == "statistics") {
+			this.statisticsPage();
 		}
 	}
 	
@@ -919,7 +1187,12 @@ public class AdminJFrame extends JFrame implements ActionListener{
 			currentScreen = "roomList";
 		} else if (e.getSource() == reservationListItem) {
 			currentScreen = "reservations";
+		} else if (e.getSource() == roomTypeListItem) {
+			currentScreen = "roomTypes";
+		} else if (e.getSource() == statisticsItem) {
+			currentScreen = "statistics";
 		}
+		
 		this.screenManager();
 
 	}

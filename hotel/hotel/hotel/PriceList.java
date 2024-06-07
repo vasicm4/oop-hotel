@@ -102,6 +102,14 @@ public class PriceList {
 		return this.roomPrices;
 	}
 	
+	public void setServices(HashMap<Service, Double> services) {
+		this.services = services;
+	}
+	
+	public void setRoomPrices(HashMap<RoomType, Double> roomPrices) {
+		this.roomPrices = roomPrices;
+	}
+	
 	public void setStartDate(LocalDate startDate) {
 		this.startDate = startDate;
 	}

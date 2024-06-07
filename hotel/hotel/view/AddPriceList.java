@@ -67,6 +67,11 @@ public class AddPriceList extends JFrame implements ActionListener{
 			return valid;
 		}
 		
+		if (PriceListManager.getInstance().find(LocalDate.parse(startDatePicker.getJFormattedTextField().getText()),LocalDate.parse(endDatePicker.getJFormattedTextField().getText())) != null) {
+			valid = false;
+			error.setText("Price list already exists for these dates");
+		}
+		
 		for (JTextField price : servicePrices.values()) {
 			if (price.getText().isEmpty()) {
 				valid = false;
@@ -95,7 +100,7 @@ public class AddPriceList extends JFrame implements ActionListener{
 		
 	}
 	
-	public AddPriceList(ManagerManager managerManager) {
+	public AddPriceList(ManagerManager managerManager, ArrayList<String> data) {
 		this.managerManager = managerManager;
 		
 		Properties properties = new Properties();
