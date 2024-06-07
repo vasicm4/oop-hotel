@@ -39,7 +39,7 @@ public class GuestJFrame extends JFrame implements ActionListener{
 		ReservationManager reservationManager = ManagerManager.reservationManager;
 		ArrayList<Reservation> reservations = reservationManager.findReservations(ManagerManager.getGuestManager().find(username));
 	
-		String[][] data = new String[reservations.size()][7];
+		String[][] data = new String[reservations.size() + 1][7];
 		int i = 0;
 		for (Reservation reservation : reservations) {
 			data[i][0] = reservation.getCheckIn().toString();
@@ -55,6 +55,9 @@ public class GuestJFrame extends JFrame implements ActionListener{
 			data[i][6] = String.valueOf(reservation.getPrice(ManagerManager.getPriceListManager(), reservation.getRoomType()));
 			i++;
 		}
+		data[reservations.size()][0] = "Total";
+		data[reservations.size()][6] = String.valueOf(reservationManager.allReservationsExpenses(ManagerManager.getGuestManager().find(username)));
+		
 		table = new JTable(data, columnNames);
 		JScrollPane scrollPane = new JScrollPane(table);
 		scrollPane.setPreferredSize(new Dimension(900, 800));
@@ -71,9 +74,10 @@ public class GuestJFrame extends JFrame implements ActionListener{
 		
 		JButton buttonAdd = new JButton("Add new reservation");
 		buttonAdd.setBounds(10,0, 100, 50);
+		ArrayList<String> data = new ArrayList<String>();
 		upperPanel.add(buttonAdd);
 		buttonAdd.addActionListener(ActionEvent -> {
-			new AddReservation(managerManager, username);
+			new AddReservation(managerManager, username, data);
 		});
 		
 		JButton buttonEdit = new JButton("Cancel reservation");

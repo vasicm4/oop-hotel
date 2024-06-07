@@ -78,11 +78,13 @@ public class Reservation {
 		if (this.getStatus() == ReservationStatus.REJECTED) {
 			return 0;
 		}
+		//TODO implement price change by date
 		int days = CheckOut.getDayOfYear() - CheckIn.getDayOfYear();
 		PriceList priceList = priceListManager.find(CheckIn, CheckOut);
 		price += priceList.getRoomPrice(roomType);
 		for (Service service : services) {
 			price += priceList.getServicePrice(service);
+			price *= roomType.getCapacity();
 		}
 		return days * price;
 	}

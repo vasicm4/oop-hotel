@@ -30,6 +30,16 @@ public class RoomTypeManager {
 		return roomTypes.get(roomType);
 	}
 	
+	public HashMap<String, RoomType> getAvailableRoomTypes() {
+		HashMap<String, RoomType> availableRoomTypes = new HashMap<String, RoomType>();
+		for (RoomType roomType : roomTypes.values()) {
+			if (!roomType.isDeleted()) {
+				availableRoomTypes.put(roomType.getType(), roomType);
+			}
+		}
+		return availableRoomTypes;
+	}
+	
 	public void add(String type, int number) {
 		roomTypes.put(type, new RoomType(type, number));
 	}

@@ -57,6 +57,16 @@ public class PriceListManager {
 		return priceLists;
 	}
 	
+	public HashMap<String, PriceList> getActivePriceLists() {
+		HashMap<String, PriceList> activePriceLists = new HashMap<String, PriceList>();
+		for (PriceList priceList : priceLists.values()) {
+			if (!priceList.isDeleted()) {
+				activePriceLists.put(String.valueOf(priceList.getId()), priceList);
+			}
+		}
+		return activePriceLists;
+	}
+	
 	public void add(LocalDate startDate, LocalDate endDate, HashMap<Service, Double> services, HashMap<RoomType, Double> roomPrices) {
 		int id = this.generateID();
 		this.priceLists.put(String.valueOf(id), new PriceList(id ,startDate, endDate, services, roomPrices));

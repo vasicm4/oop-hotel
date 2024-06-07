@@ -7,6 +7,7 @@ import java.io.FileWriter;
 import java.time.LocalDate;
 import java.util.HashMap;
 
+import users.Admin;
 import users.Agent;
 import users.Education;
 import users.Gender;
@@ -39,6 +40,26 @@ public class AgentManager {
 	}
 	
 	public HashMap<String, Agent> getAgents() {
+		return agents;
+	}
+	
+	public Double calculateAllSalaries() {
+		double sum = 0;
+		for (Agent agent : agents.values()) {
+			if (!agent.isDeleted()) {
+				sum += agent.calculateSalary();
+			}
+		}
+		return sum;	
+	}
+	
+	public HashMap<String, Agent> getAvailableAgents() {
+		HashMap<String, Agent> agents = new HashMap<String, Agent>();
+		for (Agent agent : this.agents.values()) {
+			if (agent.isDeleted() == false) {
+				agents.put(agent.getUsername(), agent);
+			}
+		}
 		return agents;
 	}
 	

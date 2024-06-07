@@ -44,6 +44,16 @@ public class AdminManager {
 	public HashMap<String, Admin> getAdmins() {
 		return admins;
 	}
+	
+	public HashMap<String, Admin> getAvailableAdmins() {
+        HashMap<String, Admin> admins = new HashMap<String, Admin>();
+        for (Admin admin : this.admins.values()) {
+            if (admin.isDeleted() == false) {
+                admins.put(admin.getUsername(), admin);
+            }
+        }
+        return admins;
+    }
 
 	public void add(String username, String password, String name, String surname, LocalDate dateOfBirth, int phoneNumber, Gender gender, Education education, int experience, double baseSalary) {
 		this.admins.put(username, new Admin(username, password, name, surname, dateOfBirth, phoneNumber, gender, education, experience, baseSalary));
@@ -55,6 +65,23 @@ public class AdminManager {
 	
 	public void remove(Admin admin) {
 		admin.delete();
+	}
+	
+	public void remove(String username) {
+		Admin admin = this.find(username);
+		if (admin != null) {
+			admin.delete();
+		}
+	}
+	
+	public double calculateAllSalaries() {
+		double sum = 0;
+		for (Admin admin : admins.values()) {
+			if (!admin.isDeleted()) {
+				sum += admin.calculateSalary();
+			}
+		}
+		return sum;
 	}
 	
 	public void readData() {

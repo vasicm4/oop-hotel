@@ -44,6 +44,16 @@ public class GuestManager {
 		return guests;
 	}
 	
+	public HashMap<String, Guest> getAvailableGuests(){
+		HashMap<String, Guest> guests = new HashMap<String, Guest>();
+		for (Guest guest : this.guests.values()) {
+			if (guest.isDeleted() == false) {
+				guests.put(guest.getUsername(), guest);
+			}
+		}
+		return guests;
+	}
+	
 	public void add(String username, String password, String name, String surname, LocalDate dateOfBirth, int phoneNumber, Gender gender) {
 		this.guests.put(username, new Guest(username, password, name, surname, dateOfBirth, phoneNumber, gender));
 	}

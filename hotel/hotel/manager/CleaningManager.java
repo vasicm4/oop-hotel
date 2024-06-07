@@ -28,6 +28,7 @@ public class CleaningManager {
 	public CleaningManager() {
 		roomsByDate = new HashMap<String, ArrayList<Room>>();
         janitorByDate = new HashMap<String, HashMap<String, ArrayList<Room>>>();
+        roomsToBeCleaned = new HashMap<String, ArrayList<Room>>();
         filePath = "data/";
 	}
 	
@@ -38,6 +39,13 @@ public class CleaningManager {
 			return roomsToBeCleaned.get(janitor);
 		}
 		return null;
+	}
+	
+	public void addDailyTask(String username, Room room) {
+		if (!roomsToBeCleaned.containsKey(username)) {
+			roomsToBeCleaned.put(username, new ArrayList<Room>());
+		}
+		roomsToBeCleaned.get(username).add(room);
 	}
 	
 	public void cleanRoom(String username, Room room) {
@@ -68,6 +76,30 @@ public class CleaningManager {
 	
 	public HashMap<String, HashMap<String, ArrayList<Room>>> getJanitorByDate() {
 		return janitorByDate;
+	}
+	
+	public HashMap<String, ArrayList<Room>> getRoomsToBeCleaned() {
+		return roomsToBeCleaned;
+	}
+	
+	public String findFreeJanitor() {
+		HashMap<String, Integer> janitorRoomCount = new HashMap<String, Integer>();
+		int smallest = Integer.MAX_VALUE;
+		String janitorFound = "";
+		for (String janitor : janitorByDate.keySet()) {
+            int count = 0;
+            for (String date : janitorByDate.get(janitor).keySet()) {
+                count += janitorByDate.get(janitor).get(date).size();
+            }
+            janitorRoomCount.put(janitor, count);
+        }
+		for (String janitor : janitorRoomCount.keySet()) {
+            if (janitorRoomCount.get(janitor) < smallest) {
+                smallest = janitorRoomCount.get(janitor);
+                janitorFound = janitor;
+            }
+        }
+		return janitorFound;
 	}
 	
 	public void readRoomsToBeCleaned(RoomManager roomManager) {

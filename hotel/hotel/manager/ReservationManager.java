@@ -6,7 +6,6 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 
 import hotel.Service;
@@ -79,9 +78,31 @@ public class ReservationManager {
 		return reservationsFound;
 	}
 	
+	public HashMap<String, Reservation> getAvailableReservations() {
+		HashMap<String, Reservation> reservationsFound = new HashMap<String, Reservation>();
+		for (Reservation reservation : reservations.values()) {
+			if (!reservation.isDeleted()) {
+				reservationsFound.put(reservation.getId(), reservation);
+			}
+		}
+		return reservationsFound;
+	}
+	
+	public HashMap<String, Reservation> getDailyReservations(LocalDate date) {
+		HashMap<String, Reservation> reservationsFound = new HashMap<String, Reservation>();
+		for (Reservation reservation : reservations.values()) {
+			if (reservation.getStatus() == ReservationStatus.CHECKED_IN || reservation.getStatus() == ReservationStatus.CHECKED_OUT) {
+				if (reservation.getCheckIn().compareTo(date) == 0 && reservation.getCheckOut().compareTo(date) == 0) {
+					reservationsFound.put(reservation.getId(), reservation);
+				}
+			}
+		}
+		return reservationsFound;
+	}
+	
 	public Reservation findReservation(Guest guest, LocalDate CheckIn,LocalDate CheckOut) {
 		for (Reservation reservation :reservations.values()) {
-			if (reservation.getGuest().equals(guest) && reservation.getCheckIn().compareTo(CheckIn)>0  && reservation.getCheckOut().compareTo(CheckOut)<0 && !reservation.isDeleted()) {
+			if (reservation.getGuest().equals(guest) && reservation.getCheckIn().compareTo(CheckIn)==0  && reservation.getCheckOut().compareTo(CheckOut)==0 && !reservation.isDeleted()) {
 				return reservation;
 			}
 		}
@@ -101,6 +122,25 @@ public class ReservationManager {
 		return reservations.get(id);
 	}
 	
+	public int getOccupiedRooms(LocalDate date) {
+		int occupiedRooms = 0;
+		for (Reservation reservation : reservations.values()) {
+			if (reservation.getCheckIn().compareTo(date) <= 0 && reservation.getCheckOut().compareTo(date) >= 0) {
+				occupiedRooms++;
+			}
+		}
+		return occupiedRooms;
+	}
+
+	public Double getTotalEarnings(LocalDate startDate,LocalDate endDate) {
+		double totalEarnings = 0;
+		for (Reservation reservation : reservations.values()) {
+			if (reservation.getCheckIn().compareTo(startDate) >= 0 && reservation.getCheckOut().compareTo(endDate) <= 0) {
+				totalEarnings += reservation.getPrice(ManagerManager.getPriceListManager(), reservation.getRoomType());
+			}
+		}
+		return totalEarnings;
+	}
 	
 	public Room roomAvailable(HashMap<String, Room> rooms, LocalDate CheckIn, LocalDate CheckOut, RoomType roomType) {
 	    for (Room room : rooms.values()) {
@@ -119,9 +159,24 @@ public class ReservationManager {
 	    }
 	    return null;
 	}
-
 	
+	public void cancelExpiredReservations() {
+		for (Reservation reservation : reservations.values()) {
+			if (reservation.getCheckOut().isBefore(LocalDate.now()) && reservation.getStatus() == ReservationStatus.ON_HOLD) {
+				reservation.cancel();
+			}
+		}
+	}
 	
+	public double allReservationsExpenses(Guest guest) {
+		double expenses = 0;
+		for (Reservation reservation : reservations.values()) {
+			if (reservation.getGuest().equals(guest)) {
+				expenses += reservation.getPrice(ManagerManager.getPriceListManager(), reservation.getRoomType());
+			}
+		}
+		return expenses;
+	}
 	
 	public void writeServices() {
 		try {
@@ -183,6 +238,7 @@ public class ReservationManager {
 					this.add(LocalDate.parse(data[0]), LocalDate.parse(data[1]), roomManager.find(Integer.parseInt(data[2])), roomTypeManager.get(data[3]), guestManager.find(data[4]), services, ReservationStatus.getStatus(data[5]), data[6], Boolean.parseBoolean(data[7]));
 				}
 			}
+			this.cancelExpiredReservations();
 			
 		} catch (Exception e) {
 			System.out.println("Error reading file" + fileName);

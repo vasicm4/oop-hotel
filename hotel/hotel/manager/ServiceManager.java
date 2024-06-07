@@ -39,6 +39,16 @@ public class ServiceManager {
 		return services;
 	}
 
+	public HashMap<String, Service> getActiveServices() {
+		HashMap<String, Service> activeServices = new HashMap<String, Service>();
+		for (Service service : services.values()) {
+			if (!service.isDeleted()) {
+				activeServices.put(service.getType(), service);
+			}
+		}
+		return activeServices;
+	}
+	
 	public void add(String type) {
 		this.services.put(type,new Service(type));
 	}

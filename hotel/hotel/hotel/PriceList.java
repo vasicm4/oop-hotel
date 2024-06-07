@@ -34,6 +34,22 @@ public class PriceList {
 		this.deleted = deleted;
 	}
 	
+	public String servicesToString() {
+		String result = "";
+		for (Service service : services.keySet()) {
+			result += service.getType() + " " + services.get(service) + ",";
+		}
+		return result;
+	}
+	
+	public String roomPricesToString() {
+		String result = "";
+		for (RoomType roomType : roomPrices.keySet()) {
+			result += roomType.getType() + " " + roomPrices.get(roomType) + ",";
+		}
+		return result;
+	}
+	
 	public int getId() {
 		return id;
 	}

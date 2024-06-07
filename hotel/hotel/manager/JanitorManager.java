@@ -8,6 +8,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import users.Agent;
 import users.Education;
 import users.Gender;
 import users.Janitor;
@@ -39,6 +40,26 @@ public class JanitorManager {
 	}
 	
 	public HashMap<String, Janitor> getJanitors() {
+		return janitors;
+	}
+	
+	public Double calculateAllSalaries() {
+		double sum = 0;
+		for (Janitor janitor : janitors.values()) {
+			if (!janitor.isDeleted()) {
+				sum += janitor.calculateSalary();
+			}
+		}
+		return sum;	
+	}
+	
+	public HashMap<String, Janitor> getAvailableJanitors() {
+		HashMap<String, Janitor> janitors = new HashMap<String, Janitor>();
+		for (Janitor janitor : this.janitors.values()) {
+			if (janitor.isDeleted() == false) {
+				janitors.put(janitor.getUsername(), janitor);
+			}
+		}
 		return janitors;
 	}
 	

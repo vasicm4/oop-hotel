@@ -10,6 +10,7 @@ import java.util.HashMap;
 
 import javax.swing.JButton;
 import javax.swing.JFrame;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
@@ -65,10 +66,10 @@ public JanitorJFrame(ManagerManager managerManager, String username){
 		upperPanel.setLayout(new GridLayout());
 		upperPanel.setBounds(0,0, 1080, 50);
 		
-		JButton buttonAdd = new JButton("Clean Room");
-		buttonAdd.setBounds(10,0, 100, 50);
-		upperPanel.add(buttonAdd);
-		buttonAdd.addActionListener(ActionEvent -> {
+		JButton cleanButton = new JButton("Clean Room");
+		cleanButton.setBounds(10,0, 100, 50);
+		upperPanel.add(cleanButton);
+		cleanButton.addActionListener(ActionEvent -> {
 			try {
 				AbstractTableModel model = (AbstractTableModel) table.getModel();
 				int selectedRow = table.getSelectedRow();
@@ -77,7 +78,7 @@ public JanitorJFrame(ManagerManager managerManager, String username){
 				Room room = ManagerManager.roomManager.find(Integer.parseInt(roomNumber));
 				cleaningManager.cleanRoom(username, room);
 			} catch (Exception e) {
-				System.out.println("No rooms to clean");
+				JOptionPane.showMessageDialog(null, "Please select a reservation", "Failure", JOptionPane.ERROR_MESSAGE);
 			}
 		});
 		
@@ -93,6 +94,7 @@ public JanitorJFrame(ManagerManager managerManager, String username){
 				this.setVisible(true);
 
 		});
+		
 		
 		JButton logoutButton = new JButton("Logout");
 		logoutButton.setBounds(960,0, 100, 50);

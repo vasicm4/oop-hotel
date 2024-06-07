@@ -44,6 +44,7 @@ public class AddReservation extends JFrame implements ActionListener{
 	ArrayList<Service> selectedServices;
 	
 	public boolean validateInput() {
+		error.setText("");
 		boolean valid = true;
 		if (startDatePicker.getModel().getValue() == null) {
 			valid =  false;
@@ -74,7 +75,7 @@ public class AddReservation extends JFrame implements ActionListener{
 	}
 	
 
-	public AddReservation(ManagerManager managerManager, String username){
+	public AddReservation(ManagerManager managerManager, String username, ArrayList<String> data){
 		
 		this.username = username;
 		Properties properties = new Properties();
@@ -85,7 +86,10 @@ public class AddReservation extends JFrame implements ActionListener{
         UtilDateModel model = new UtilDateModel();
         model.setSelected(true); // Ensure model is initialized with a selected date
         JDatePanelImpl startDateJPanel = new JDatePanelImpl(model, properties);
-
+        if (data.size() != 0) {
+			model.setDate(Integer.parseInt(data.get(1).split("-")[0]), Integer.parseInt(data.get(1).split("-")[1]) - 1,
+					Integer.parseInt(data.get(1).split("-")[2]));        
+			}
         startDatePicker = new JDatePickerImpl(startDateJPanel, new AbstractFormatter() {
             @Override
             public String valueToString(Object value) throws ParseException {
@@ -118,7 +122,11 @@ public class AddReservation extends JFrame implements ActionListener{
         properties.put("text.month", "Month");
         properties.put("text.year", "Year");
         model = new UtilDateModel();
-        model.setSelected(true); // Ensure model is initialized with a selected date
+        if (data.size() != 0) {
+			model.setDate(Integer.parseInt(data.get(2).split("-")[0]), Integer.parseInt(data.get(2).split("-")[1]) - 1,
+					Integer.parseInt(data.get(2).split("-")[2]));
+		}
+        model.setSelected(true);
         JDatePanelImpl endDateJPanel = new JDatePanelImpl(model, properties);
 		endDatePicker = new JDatePickerImpl(endDateJPanel, new AbstractFormatter() {
 			@Override
@@ -157,6 +165,9 @@ public class AddReservation extends JFrame implements ActionListener{
 			i++;
 		}
 		roomTypeCombobox = new JComboBox(comboBox);
+		if (data.size() != 0) {
+			roomTypeCombobox.setSelectedItem(data.get(4));
+		}
 		roomTypePanel.add(roomTypeCombobox);
 		this.add(roomTypePanel);
 		
@@ -213,7 +224,7 @@ public class AddReservation extends JFrame implements ActionListener{
 		if (e.getSource() == buttonSubmit) {
 			if (validateInput()) {
 				ReservationManager reservationManager = ManagerManager.getReservationManager();
-				RoomType roomType = ManagerManager.getRoomTypeManager().getRoomType((String) roomTypeCombobox.getSelectedItem());
+				RoomType roomType = ManagerManager.getRoomTypeManager().getRoomType(String.valueOf(roomTypeCombobox.getSelectedItem()));
 				Guest guest = ManagerManager.getGuestManager().find(username);
 				ManagerManager.getReservationManager().add(LocalDate.parse(startDatePicker.getJFormattedTextField().getText()), LocalDate.parse(endDatePicker.getJFormattedTextField().getText()),null, roomType, guest, selectedServices, ReservationStatus.ON_HOLD, username, false);
 

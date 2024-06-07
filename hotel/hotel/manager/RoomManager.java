@@ -1,4 +1,4 @@
-package manager;
+ package manager;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -49,11 +49,30 @@ public class RoomManager {
 	}
 	
 	public HashMap<String, Room> getRooms() {
-		return rooms;
+		HashMap<String, Room> availableRooms = new HashMap<String, Room>();
+		for (Room room : rooms.values()) {
+			if (room.isDeleted() == false) {
+				availableRooms.put(String.valueOf(room.getNumber()), room);
+			}
+		}
+		return availableRooms;
+	}
+	
+	public int generateNumber() {
+		int number = 0;
+		for (Room room : rooms.values()) {
+			number = room.getNumber();
+		}
+		number++;
+		return number;
 	}
 	
 	public void add(RoomType type, int number, int floor) {
 		this.rooms.put(String.valueOf(number),new Room(type, number, floor));
+	}
+	
+	public void add(RoomType type, int floor) {
+		this.rooms.put(String.valueOf(this.generateNumber()), new Room(type, this.generateNumber(), floor));
 	}
 	
 	

@@ -7,6 +7,7 @@ import java.awt.event.ActionListener;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Properties;
 
@@ -37,6 +38,7 @@ public class AddGuest extends JFrame implements ActionListener{
 	JComboBox<Gender> gender;
 	JDatePickerImpl datePicker;
 	JLabel error;
+	JFrame AddGuest = this;
 	
 	public boolean validateUsername(GuestManager guestManager) {
 		boolean valid = true;
@@ -51,7 +53,7 @@ public class AddGuest extends JFrame implements ActionListener{
 	}
 	
 	public boolean validateGuest(boolean valid) {
-		
+		error.setText("");
 		if (nameField.getText().isEmpty()) {
     		valid = false;
     		error.setText("Name field cannot be empty");
@@ -71,7 +73,6 @@ public class AddGuest extends JFrame implements ActionListener{
 		}
 		
 		try {
-			System.out.println(String.valueOf(passwordField.getPassword()));
 			Integer.parseInt(String.valueOf(passwordField.getPassword()));
         } catch (NumberFormatException e) {
         	valid = false;
@@ -81,7 +82,7 @@ public class AddGuest extends JFrame implements ActionListener{
 		if (phone.getValue().toString().isEmpty()) {
     		valid = false;
     		error.setText("Phone field cannot be empty");
-		} else if (phone.getValue().toString().length() != 9) {
+		} else if (phone.getValue().toString().length() < 8) {
 			valid = false;
 			error.setText("Phone number must be 9 characters long");
 		}
@@ -95,7 +96,7 @@ public class AddGuest extends JFrame implements ActionListener{
 		
     }
 	
-	public AddGuest(ManagerManager managerManager) {
+	public AddGuest(ManagerManager managerManager, ArrayList<String> data) {
 		JFrame addEmployeeFrame = new JFrame();
 		addEmployeeFrame.setTitle("Add new guest");
 		addEmployeeFrame.setSize(800, 800);
@@ -108,6 +109,9 @@ public class AddGuest extends JFrame implements ActionListener{
 	    JPanel usernamePanel = new JPanel();
 	    usernamePanel.setBorder(javax.swing.BorderFactory.createTitledBorder("Username"));
 		usernameField = new JTextField();
+		if (data.size() != 0) {
+			usernameField.setText(data.get(0));
+		}
 		usernameField.setPreferredSize(new Dimension(700,40));
 		usernameField.setFont(new java.awt.Font("Tahoma", 1, 25));
 		usernamePanel.add(usernameField);
@@ -116,6 +120,9 @@ public class AddGuest extends JFrame implements ActionListener{
 	    JPanel passwordPanel = new JPanel();
 	    passwordPanel.setBorder(javax.swing.BorderFactory.createTitledBorder("Password"));
 	    passwordField = new JPasswordField();
+	    if (data.size() != 0) {
+	    	passwordField.setText(data.get(1));
+	    }
 	    passwordField.setPreferredSize(new Dimension(700, 40));
 	    passwordField.setFont(new java.awt.Font("Tahoma", 1, 25));
 	    passwordPanel.add(passwordField);
@@ -124,6 +131,9 @@ public class AddGuest extends JFrame implements ActionListener{
 	    JPanel namePanel = new JPanel();
 	    namePanel.setBorder(javax.swing.BorderFactory.createTitledBorder("First Name"));
 	    nameField = new JTextField();
+		if (data.size() != 0) {
+			nameField.setText(data.get(2));
+		}
 	    nameField.setPreferredSize(new Dimension(700, 40));
 	    nameField.setFont(new java.awt.Font("Tahoma", 1, 25));
 	    namePanel.add(nameField);
@@ -132,6 +142,9 @@ public class AddGuest extends JFrame implements ActionListener{
 	    JPanel surnamePanel = new JPanel();
 	    surnamePanel.setBorder(javax.swing.BorderFactory.createTitledBorder("Last Name"));
 	    surnameField = new JTextField();
+        if (data.size() != 0) {
+        	surnameField.setText(data.get(3));
+        }
 	    surnameField.setPreferredSize(new Dimension(700, 40));
 	    surnameField.setFont(new java.awt.Font("Tahoma", 1, 25));
 	    surnamePanel.add(surnameField);
@@ -143,6 +156,10 @@ public class AddGuest extends JFrame implements ActionListener{
         properties.put("text.year", "Year");
 
         UtilDateModel model = new UtilDateModel();
+		if (data.size() != 0) {
+			model.setDate(Integer.parseInt(data.get(4).split("-")[0]), Integer.parseInt(data.get(4).split("-")[1]) - 1,
+					Integer.parseInt(data.get(4).split("-")[2]));
+		}
         model.setSelected(true); // Ensure model is initialized with a selected date
 
         JDatePanelImpl dateOfBirthPanel = new JDatePanelImpl(model, properties);
@@ -175,6 +192,9 @@ public class AddGuest extends JFrame implements ActionListener{
 	    JPanel phonePanel = new JPanel();
 	    phonePanel.setBorder(javax.swing.BorderFactory.createTitledBorder("Phone"));
 	    phone = new JSpinner();
+		if (data.size() != 0) {
+			phone.setValue(Integer.parseInt(data.get(5)));
+		}
 	    phone.setPreferredSize(new Dimension(700, 40));
 	    phonePanel.add(phone);
 	    addEmployeeFrame.add(phonePanel);
@@ -183,6 +203,9 @@ public class AddGuest extends JFrame implements ActionListener{
 	    genderPanel.setBorder(javax.swing.BorderFactory.createTitledBorder("Gender"));
 	    String[] genders = {"MALE", "FEMALE"};
 	    gender = new JComboBox(genders);
+		if (data.size() != 0) {
+			gender.setSelectedItem(data.get(6));
+		}
 	    genderPanel.add(gender);
 	    addEmployeeFrame.add(genderPanel);
 	 
@@ -200,11 +223,13 @@ public class AddGuest extends JFrame implements ActionListener{
 	    buttonSubmit.addActionListener(ActionEvent -> {
 	    	GuestManager guestManager = ManagerManager.getGuestManager();
 	    	boolean valid = true;
-	    	valid = validateUsername(guestManager);
+			if (data.size() == 0) {
+				valid = validateUsername(guestManager);
+			}
 	    	valid = validateGuest(valid);
 	    	if (valid) {
 	    		guestManager.add(usernameField.getText(), String.valueOf(passwordField.getPassword()), nameField.getText(), surnameField.getText(), LocalDate.parse(datePicker.getJFormattedTextField().getText()), Integer.parseInt(phone.getValue().toString()), Gender.getGender(gender.getSelectedItem().toString()));
-	    		this.dispose();
+	    		AddGuest.dispose();
 	    	}
 	    });
 }

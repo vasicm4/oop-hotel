@@ -5,8 +5,13 @@ import java.awt.Dimension;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.HashMap;
+import java.util.Properties;
 
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
@@ -18,7 +23,12 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
+import javax.swing.JFormattedTextField.AbstractFormatter;
 import javax.swing.table.AbstractTableModel;
+
+import org.jdatepicker.impl.JDatePanelImpl;
+import org.jdatepicker.impl.JDatePickerImpl;
+import org.jdatepicker.impl.UtilDateModel;
 
 import hotel.Service;
 import manager.CleaningManager;
@@ -38,11 +48,13 @@ public class AgentJFrame extends JFrame implements ActionListener{
 	JMenuItem guestsItem;
 	JMenuItem reservationsItem;
 	JMenuItem roomsItem;
+	JMenuItem dailyOccupancyItem;
 	
 	JPanel upperPanel;
 	ArrayList<Service> selectedServices;
+	ArrayList<String> data;
 	JTable table;
-	String screen = "guests";
+	String screen = "reservations";
 	
 	public JPanel tableGuests() {
 		tablePanel = new JPanel();
@@ -81,7 +93,7 @@ public class AgentJFrame extends JFrame implements ActionListener{
 		String[] columnNames = { "Username", "Start Date", "End Date", "Room", "RoomType", "Status", "Services", "Price"};
 
 		ReservationManager reservationManager = ManagerManager.reservationManager;
-		HashMap<String, Reservation> reservations = reservationManager.getReservations();
+		HashMap<String, Reservation> reservations = reservationManager.getAvailableReservations();
 		String[][] data = new String[reservations.size()][8];
 		int i = 0;
 		for (Reservation reservation : reservations.values()) {
@@ -103,6 +115,46 @@ public class AgentJFrame extends JFrame implements ActionListener{
 			data[i][7] = String.valueOf(reservation.getPrice(ManagerManager.getPriceListManager(), reservation.getRoomType()));
 			i++;
 		}
+		table = new JTable(data, columnNames);
+		JScrollPane scrollPane = new JScrollPane(table);
+		scrollPane.setPreferredSize(new Dimension(900, 800));
+		tablePanel.add(scrollPane);
+		return tablePanel;
+	}
+	
+	public JPanel tableDailyOccupancy(LocalDate date) {
+		tablePanel = new JPanel();
+		table = new JTable();
+		table.setDefaultEditor(Object.class, null);
+		String[] columnNames = { "Username", "Start Date", "End Date", "Room", "RoomType", "Status", "Services", "Price"};
+
+		ReservationManager reservationManager = ManagerManager.reservationManager;
+		HashMap<String, Reservation> reservations = reservationManager.getDailyReservations(date);
+		String[][] data = new String[reservations.size() + 1][8];
+		int i = 0;
+		for (Reservation reservation : reservations.values()) {
+			data[i][0] = reservation.getGuest().getUsername();
+			data[i][1] = reservation.getCheckIn().toString();
+			data[i][2] = reservation.getCheckOut().toString();
+			if (reservation.getRoom() == null) {
+				data[i][3] = "";
+			} else {
+				data[i][3] = reservation.getRoom().toString();
+			}
+			data[i][4] = reservation.getRoomType().toString();
+			data[i][5] = ReservationStatus.getStatus(reservation.getStatus());
+			if (reservation.getServices() != null) {
+				data[i][6] = reservation.getServices().toString();
+			} else {
+				data[i][6] = "";
+			}
+			data[i][7] = String.valueOf(reservation.getPrice(ManagerManager.getPriceListManager(), reservation.getRoomType()));
+			i++;
+		}
+		//TODO add daily occupancy
+		data[reservations.size()][0] = "Daily Occupancy";
+		data[reservations.size()][7] = String.valueOf(reservationManager.getOccupiedRooms(date));
+		
 		table = new JTable(data, columnNames);
 		JScrollPane scrollPane = new JScrollPane(table);
 		scrollPane.setPreferredSize(new Dimension(900, 800));
@@ -149,15 +201,19 @@ public class AgentJFrame extends JFrame implements ActionListener{
 		this.setVisible(true);
 	}
 	
-	public void addServices() {
+	public void addServices(ArrayList<Service> alreadySelectedServices) {
 		JFrame servicesFrame = new JFrame();
 		JPanel servicesPanel = new JPanel();
 		
 		servicesPanel.setBorder(javax.swing.BorderFactory.createTitledBorder("Services"));
 		selectedServices = new ArrayList<Service>();
+		selectedServices.addAll(alreadySelectedServices);
 		for (Service service : ManagerManager.getServiceManager().getServices().values()) {
 			if (service.isDeleted() == false) {
 				JCheckBox checkBox = new JCheckBox(service.getType());
+				if (alreadySelectedServices.contains(service)) {
+					checkBox.setSelected(true);
+				}
 				servicesPanel.add(checkBox);
 				checkBox.addActionListener(new ActionListener() {
 					@Override
@@ -188,9 +244,10 @@ public class AgentJFrame extends JFrame implements ActionListener{
 	public void guestsPage() {
 		JButton buttonAdd = new JButton("Add new guest");
 		buttonAdd.setBounds(10,0, 100, 50);
+		data = new ArrayList<String>();
 		upperPanel.add(buttonAdd);
 		buttonAdd.addActionListener(ActionEvent -> {
-			new AddGuest(managerManager);
+			new AddGuest(managerManager, data);
 		});
 		
 		JButton buttonRefresh = new JButton("Refresh");
@@ -208,12 +265,12 @@ public class AgentJFrame extends JFrame implements ActionListener{
 		JButton buttonReservation = new JButton("Add new reservation");
 		buttonReservation.setBounds(850,0, 100, 50);
 		upperPanel.add(buttonReservation);
+		data = new ArrayList<String>();
 		buttonReservation.addActionListener(ActionEvent -> {
-			//TODO find user and add reservation to his name
 			try {
 				AbstractTableModel model = (AbstractTableModel) table.getModel();
 				int selectedRow = table.getSelectedRow();
-				new AddReservation(managerManager, model.getValueAt(selectedRow, 0).toString());
+				new AddReservation(managerManager, model.getValueAt(selectedRow, 0).toString(), data);
 			} catch (Exception e) {
 				JOptionPane.showMessageDialog(null, "Please select a guest", "Failure", JOptionPane.ERROR_MESSAGE);
 			}
@@ -273,9 +330,9 @@ public class AgentJFrame extends JFrame implements ActionListener{
 			} catch (Exception e) {
 				JOptionPane.showMessageDialog(null, "Please select a reservation", "Failure", JOptionPane.ERROR_MESSAGE);
 			}
+			
+		
 		});
-		
-		
 		
 		JButton buttonCheckIn = new JButton("Check In");
 		buttonCheckIn.setBounds(20,0, 100, 50);
@@ -293,6 +350,12 @@ public class AgentJFrame extends JFrame implements ActionListener{
 							JOptionPane.ERROR_MESSAGE);
 					return;
 				}
+				ArrayList<Service> alreadySelectedServices = new ArrayList<Service>();
+				if (reservation.getServices() != null) {
+					for (Service service : reservation.getServices()) {
+						alreadySelectedServices.add(service);
+					}
+				}
 				ReservationManager reservationManager = ManagerManager.reservationManager;
 				if (reservation.getRoom() != null) {
 					Room room = reservation.getRoom();
@@ -300,12 +363,16 @@ public class AgentJFrame extends JFrame implements ActionListener{
 						JOptionPane.showMessageDialog(null, "This room is cleaned", "Failure",
 								JOptionPane.ERROR_MESSAGE);
 						return;
+					} else if (room.getStatus() == RoomStatus.OCCUPIED) {
+						JOptionPane.showMessageDialog(null, "This room is occupied", "Failure",
+								JOptionPane.ERROR_MESSAGE);
+						return;
 					} else {
 						reservation.checkIn(room);
 						JOptionPane.showMessageDialog(null, "Checked in", "Success", JOptionPane.INFORMATION_MESSAGE);
 						int reply = JOptionPane.showConfirmDialog(null, "Do you want to add services?", "Services", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
 						if (JOptionPane.YES_OPTION == reply) {
-							this.addServices();
+							this.addServices(alreadySelectedServices);
 							reservation.setServices(selectedServices);
 						} else {
 							JOptionPane.showMessageDialog(null, "Checked in", "Success", JOptionPane.INFORMATION_MESSAGE);
@@ -318,14 +385,14 @@ public class AgentJFrame extends JFrame implements ActionListener{
 								JOptionPane.ERROR_MESSAGE);
 						reservation.reject();
 					} else {
-						Room room = reservationManager.roomAvailable(ManagerManager.roomManager.getRooms(),
-								reservation.getCheckIn(), reservation.getCheckOut(), reservation.getRoomType());
+						Room room = reservationManager.roomAvailable(ManagerManager.roomManager.getRooms(), reservation.getCheckIn(), reservation.getCheckOut(), reservation.getRoomType());
 						reservation.setRoom(room);
 						reservation.checkIn(room);
 						int reply = JOptionPane.showConfirmDialog(null, "Do you want to add services?", "Services", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
 						if (JOptionPane.YES_OPTION == reply) {
-							this.addServices();
+							this.addServices(alreadySelectedServices);
 							reservation.setServices(selectedServices);
+							
 						} else {
 							JOptionPane.showMessageDialog(null, "Checked in", "Success", JOptionPane.INFORMATION_MESSAGE);
 						}
@@ -359,13 +426,23 @@ public class AgentJFrame extends JFrame implements ActionListener{
 					JOptionPane.showMessageDialog(null, "This reservation is not checked in", "Failure",
 							JOptionPane.ERROR_MESSAGE);
 					return;
+				} else if (reservation.getStatus() == ReservationStatus.ON_HOLD) {
+					JOptionPane.showMessageDialog(null, "This reservation is on hold", "Failure",
+							JOptionPane.ERROR_MESSAGE);
+					return;
 				}
 				reservation.checkOut();
 				CleaningManager cleanerManager = ManagerManager.getCleaningManager();
-				//TODO implement cleaner manager function to give job to most available janitor
+				String janitorFound = cleanerManager.findFreeJanitor();
+				if (janitorFound == "") {
+					JOptionPane.showMessageDialog(null, "No janitors available", "Failure", JOptionPane.ERROR_MESSAGE);
+					return;
+				} 
+				
+				cleanerManager.addDailyTask(janitorFound, reservation.getRoom());
+
 			} catch (Exception e) {
-				JOptionPane.showMessageDialog(null, "Please select a reservation", "Failure",
-						JOptionPane.ERROR_MESSAGE);
+				JOptionPane.showMessageDialog(null, "Please select a reservation", "Failure", JOptionPane.ERROR_MESSAGE);
 			}
 		});
 		
@@ -383,8 +460,85 @@ public class AgentJFrame extends JFrame implements ActionListener{
 		
 		this.updateTablePanel();
 			
+		JButton logoutButton = new JButton("Logout");
+		logoutButton.setBounds(960,0, 100, 50);
+		logoutButton.addActionListener(ActionEvent -> {
+            this.dispose();
+            new LoginJFrame(managerManager);
+        });
+		upperPanel.add(logoutButton);
+		
 	}
 	
+	
+	public void dailyOccupancyPage() {
+		// TODO implement daily occupancy		
+		JButton pickDateButton = new JButton("Pick date");
+		pickDateButton.setBounds(10,0, 100, 50);
+		upperPanel.add(pickDateButton);
+		pickDateButton.addActionListener(ActionEvent -> {
+			Properties properties = new Properties();
+			JDatePickerImpl date;
+	        properties.put("text.today", "Today");
+	        properties.put("text.month", "Month");
+	        properties.put("text.year", "Year");
+			 UtilDateModel model = new UtilDateModel();
+		        model.setSelected(true); // Ensure model is initialized with a selected date
+		        JDatePanelImpl startDateJPanel = new JDatePanelImpl(model, properties);
+	
+		        date = new JDatePickerImpl(startDateJPanel, new AbstractFormatter() {
+		            @Override
+		            public String valueToString(Object value) throws ParseException {
+		                if (value != null) {
+		                    Calendar cal = (Calendar) value;
+		                    SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
+		                    return format.format(cal.getTime());
+		                }
+		                return "";
+		            }
+	
+		            @Override
+		            public Object stringToValue(String text) throws ParseException {
+		                SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
+		                Calendar cal = Calendar.getInstance();
+		                cal.setTime(format.parse(text));
+		                return cal;
+		            }
+		        });
+			JFrame dateFrame = new JFrame();
+			JPanel datePanel = new JPanel();
+			JButton buttonSubmit = new JButton("Submit");
+			datePanel.setBorder(javax.swing.BorderFactory.createTitledBorder("Pick date"));
+			datePanel.add(date);
+			dateFrame.add(datePanel);
+			dateFrame.add(buttonSubmit);
+			dateFrame.setSize(300, 300);
+			dateFrame.setLayout(new GridLayout(2, 1));
+			dateFrame.setLocationRelativeTo(null);
+			dateFrame.setVisible(true);
+			buttonSubmit.addActionListener(ActionEvent2 -> {
+				dateFrame.dispose();
+				this.remove(tablePanel);
+				tablePanel = new JPanel();
+				this.tableDailyOccupancy(LocalDate.parse(date.getJFormattedTextField().getText()));
+				this.add(tablePanel, BorderLayout.CENTER);
+				this.repaint();
+				this.setVisible(true);
+			});
+		});
+		
+		JButton buttonRefresh = new JButton("Refresh");
+		buttonRefresh.setBounds(240,0, 100, 50);
+		upperPanel.add(buttonRefresh);
+		buttonRefresh.addActionListener(ActionEvent -> {
+			this.remove(tablePanel);
+			tablePanel = new JPanel();
+			this.tableReservations();
+			this.add(tablePanel, BorderLayout.CENTER);
+			this.repaint();
+			this.setVisible(true);
+		});
+	}
 	
 	public void roomsPage() {
 		JButton buttonRefresh = new JButton("Refresh");
@@ -414,6 +568,8 @@ public class AgentJFrame extends JFrame implements ActionListener{
 			reservationsPage();
 		} else if (screen == "rooms") {
 			roomsPage();
+		} else if (screen == "dailyOccupancy") {
+			dailyOccupancyPage();
 		}
 		this.add(upperPanel, BorderLayout.NORTH);
 		this.repaint();
@@ -439,7 +595,11 @@ public class AgentJFrame extends JFrame implements ActionListener{
 		roomsItem = new JMenuItem("Rooms");
 		hotelMenu.add(roomsItem);
 		roomsItem.addActionListener(this);
-
+		
+		dailyOccupancyItem = new JMenuItem("Daily Occupancy");
+		hotelMenu.add(dailyOccupancyItem);
+		dailyOccupancyItem.addActionListener(this);
+		
 		menuBar.add(guestsMenu);
 		menuBar.add(hotelMenu);
 		this.add(menuBar);
@@ -466,6 +626,8 @@ public class AgentJFrame extends JFrame implements ActionListener{
 			screen = "reservations";
 		} else if (e.getSource() == roomsItem) {
 			screen = "rooms";
+		} else if (e.getSource() == dailyOccupancyItem) {
+			screen = "dailyOccupancy";
 		}
         this.updateUpperPanel();		
 	}
