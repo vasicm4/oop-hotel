@@ -82,6 +82,21 @@ public class CleaningManager {
 		return roomsToBeCleaned;
 	}
 	
+	public HashMap<String, Integer> getCleanedRoomsCount(LocalDate startDate, LocalDate endDate) {
+		HashMap<String, Integer> cleanedRoomsByJanitorCount = new HashMap<String, Integer>();
+		for (String janitor: this.janitorByDate.keySet()) {
+			int count = 0;
+			for (String date : this.janitorByDate.get(janitor).keySet()) {
+				LocalDate localDate = LocalDate.parse(date);
+				if (localDate.isAfter(startDate) && localDate.isBefore(endDate)) {
+					count += this.janitorByDate.get(janitor).get(date).size();
+				}
+			}
+			cleanedRoomsByJanitorCount.put(janitor, count);
+		}
+		return cleanedRoomsByJanitorCount;
+	}
+	
 	public String findFreeJanitor() {
 		HashMap<String, Integer> janitorRoomCount = new HashMap<String, Integer>();
 		int smallest = Integer.MAX_VALUE;

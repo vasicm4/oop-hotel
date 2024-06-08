@@ -5,9 +5,13 @@ import java.awt.Dimension;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.HashMap;
+import java.util.Properties;
 
 import javax.swing.JButton;
 import javax.swing.JComboBox;
@@ -21,6 +25,11 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
+import javax.swing.JFormattedTextField.AbstractFormatter;
+
+import org.jdatepicker.impl.JDatePanelImpl;
+import org.jdatepicker.impl.JDatePickerImpl;
+import org.jdatepicker.impl.UtilDateModel;
 
 import hotel.PriceList;
 import hotel.Service;
@@ -66,6 +75,8 @@ public class AdminJFrame extends JFrame implements ActionListener{
 	JLabel error;
 	
 	ArrayList<String> data;
+	JDatePickerImpl startDatePicker;
+	JDatePickerImpl endDatePicker;
 	
 	HashMap<Service, JTextField> servicePrices = new HashMap<Service, JTextField>();
 	HashMap<RoomType, JTextField> roomTypePrices = new HashMap<RoomType, JTextField>();
@@ -98,6 +109,196 @@ public class AdminJFrame extends JFrame implements ActionListener{
 		}
 		
 		return valid;
+    }
+	
+    public boolean validateDates() {
+    	error.setText("");
+		boolean valid = true;
+		if (startDatePicker.getModel().getValue() == null) {
+			valid =  false;
+			error.setText("Please enter a start date");
+		} else if (LocalDate.now().isAfter(LocalDate.parse(startDatePicker.getJFormattedTextField().getText()))) {
+			valid =  false;
+			error.setText("Please enter a valid start date");
+		} 
+		
+		if (endDatePicker.getModel().getValue() == null) {
+			error.setText("Please enter a end date");
+			valid = false;
+		} else if (LocalDate.parse(endDatePicker.getJFormattedTextField().getText()).isBefore(LocalDate.parse(startDatePicker.getJFormattedTextField().getText()))) {
+			error.setText("Please enter a valid end date");
+			valid = false;
+		} else if (LocalDate.parse(endDatePicker.getJFormattedTextField().getText()).equals(LocalDate.parse(startDatePicker.getJFormattedTextField().getText()))) {
+			error.setText("Please enter a valid end date");
+			valid = false;
+		}
+		
+		return valid;
+    }
+	
+	
+	public void datePickerJFrame(String type) {
+		
+		JFrame datePickerFrame = new JFrame();
+		
+		Properties properties = new Properties();
+	    properties.put("text.today", "Today");
+	    properties.put("text.month", "Month");
+	    properties.put("text.year", "Year");
+
+	    UtilDateModel model = new UtilDateModel();
+	    model.setSelected(true); // Ensure model is initialized with a selected date
+	    JDatePanelImpl startDateJPanel = new JDatePanelImpl(model, properties);
+	    startDatePicker = new JDatePickerImpl(startDateJPanel, new AbstractFormatter() {
+	        @Override
+	        public String valueToString(Object value) throws ParseException {
+	            if (value != null) {
+	                Calendar cal = (Calendar) value;
+	                SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
+	                return format.format(cal.getTime());
+	            }
+	            return "";
+	        }
+
+	        @Override
+	        public Object stringToValue(String text) throws ParseException {
+	            SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
+	            Calendar cal = Calendar.getInstance();
+	            cal.setTime(format.parse(text));
+	            return cal;
+	        }
+	    });
+	    
+	    JPanel startDatePanel = new JPanel();
+	    startDatePanel.setBorder(javax.swing.BorderFactory.createTitledBorder("StartDate"));
+	    startDatePanel.add(startDatePicker);
+	    datePickerFrame.add(startDatePanel);
+	    
+		properties = new Properties();
+	    properties.put("text.today", "Today");
+	    properties.put("text.month", "Month");
+	    properties.put("text.year", "Year");
+	    model = new UtilDateModel();
+	    model.setSelected(true);
+	    JDatePanelImpl endDateJPanel = new JDatePanelImpl(model, properties);
+		endDatePicker = new JDatePickerImpl(endDateJPanel, new AbstractFormatter() {
+			@Override
+			public String valueToString(Object value) throws ParseException {
+				if (value != null) {
+					Calendar cal = (Calendar) value;
+					SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
+					return format.format(cal.getTime());
+				}
+				return "";
+			}
+
+			@Override
+			public Object stringToValue(String text) throws ParseException {
+				SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
+				Calendar cal = Calendar.getInstance();
+				cal.setTime(format.parse(text));
+				return cal;
+			}
+		});
+		
+		JPanel endDatePanel = new JPanel();
+		endDatePanel.setBorder(javax.swing.BorderFactory.createTitledBorder("EndDate"));
+		endDatePanel.add(endDatePicker);
+		datePickerFrame.add(endDatePanel);
+		
+		JPanel buttonPanel = new JPanel();
+	    JButton buttonSubmit = new JButton("Submit");
+	    buttonSubmit.addActionListener(ActionListener -> {
+        	if (validateDates()) {
+        		this.remove(tablePanel);
+        		tablePanel = new JPanel();
+        		this.statsTable(LocalDate.parse(startDatePicker.getJFormattedTextField().getText()), LocalDate.parse(endDatePicker.getJFormattedTextField().getText()), type);
+        		this.add(tablePanel, BorderLayout.CENTER);
+        		this.repaint();
+        		this.setVisible(true);
+        		datePickerFrame.dispose();
+        	}
+        });
+	    buttonPanel.setLayout(new GridLayout(2, 1));
+	    error = new JLabel("");
+	    error.setForeground(new java.awt.Color(255, 0, 0));
+	    error.setFont(new java.awt.Font("Tahoma", 1, 20));
+	    error.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+	    buttonPanel.add(error);
+	    buttonPanel.add(buttonSubmit);
+	    datePickerFrame.add(buttonPanel);
+		
+	    datePickerFrame.setTitle("Hotel");
+	    datePickerFrame.setSize(400, 400);
+	    datePickerFrame.setVisible(true);
+	    datePickerFrame.setResizable(false);
+	    datePickerFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+	    datePickerFrame.getContentPane().setBackground(new java.awt.Color(222, 224, 223));
+	    datePickerFrame.setLocationRelativeTo(null);
+	    datePickerFrame.setLayout(new GridLayout(3, 1));
+	}
+	
+	public JPanel statsTable(LocalDate startDate, LocalDate endDate, String type) {
+		tablePanel = new JPanel();
+		table = new JTable();
+		table.setDefaultEditor(Object.class, null);
+		
+		
+		if (type.equals("janitor")) {
+			CleaningManager cleaningManager = ManagerManager.getCleaningManager();
+			HashMap<String, Integer> cleanedRooms = cleaningManager.getCleanedRoomsCount(startDate, endDate);
+			String[] columnNames = {"Janitor", "Number of Rooms"};
+			String[][] data = new String[cleanedRooms.size()][2];
+			int i = 0;
+			for (String janitor : cleanedRooms.keySet()) {
+				data[i][0] = janitor;
+				data[i][1] = String.valueOf(cleanedRooms.get(janitor));
+				i++;
+			}
+			table = new JTable(data, columnNames);
+			
+		} else if (type.equals("reservation")) {
+			ReservationManager reservationManager = ManagerManager.reservationManager;
+			String[] columnNames = {"Status", "Total Value"};
+			String[][] data = new String[4][2];
+			ArrayList<Reservation> reservations = reservationManager.findReservations(startDate,endDate);
+			int accepted = 0;
+			int rejected = 0;
+			int cancelled = 0;
+			
+			for (Reservation reservation : reservations) {
+				if (reservation.getStatus().equals(ReservationStatus.ACCEPTED) || reservation.getStatus().equals(ReservationStatus.CHECKED_IN) || reservation.getStatus().equals(ReservationStatus.CHECKED_OUT)) {
+					accepted++;
+				} else if (reservation.getStatus().equals(ReservationStatus.REJECTED)) {
+					rejected++;
+				} else if (reservation.getStatus().equals(ReservationStatus.CANCELLED)) {
+					cancelled++;
+				}
+			}
+			data[0][0] = "Accepted Reservations";
+			data[0][1] = String.valueOf(accepted);
+			data[1][0] = "Rejected Reservations";
+			data[1][1] = String.valueOf(rejected);
+			data[2][0] = "Cancelled Reservations";
+			data[2][1] = String.valueOf(cancelled);
+			data[3][0] = "Total Reservations";
+			data[3][1] = String.valueOf(accepted + rejected + cancelled);
+			table = new JTable(data, columnNames);
+		
+		} else if (type.equals("room")) {
+			ReservationManager reservationManager = ManagerManager.reservationManager;
+			String[] columnNames = {"Number", "Type", "Count", "Revenue"};
+			HashMap<Room, Integer> roomsCount = reservationManager.getRoomCount(startDate, endDate);
+//			HashMap<Room, Double> roomsRevenue = reservationManager.getRoomRevenue(startDate, endDate);
+			//TODO make table
+			
+		}
+		
+		JScrollPane scrollPane = new JScrollPane(table);
+		scrollPane.setPreferredSize(new Dimension(900, 800));
+		tablePanel.add(scrollPane);
+		return tablePanel;
+		
 	}
 	
 	public JPanel tableUser() {
@@ -987,22 +1188,22 @@ public class AdminJFrame extends JFrame implements ActionListener{
 		janitorStats.setBounds(120,0, 150, 50);
 		upperPanel.add(janitorStats);
 		janitorStats.addActionListener(ActionEvent -> {
-			//TODO: implement janitor statistics
+			this.datePickerJFrame("janitor");
 		});
 		
 		JButton reservationStats = new JButton("Reservation Statistics");
 		reservationStats.setBounds(280,0, 150, 50);
 		upperPanel.add(reservationStats);
 		reservationStats.addActionListener(ActionEvent -> {
-			//TODO: implement reservation statistics
+			this.datePickerJFrame("reservation");
 		});
 		
 		JButton roomStats = new JButton("Room Statistics");
 		roomStats.setBounds(440,0, 150, 50);
 		upperPanel.add(roomStats);
 		roomStats.addActionListener(ActionEvent -> {
-			//TODO: implement room statistics
-		});
+			this.datePickerJFrame("room");
+        });
 		
 		JButton janitorGraph = new JButton("Janitor Graph");
 		janitorGraph.setBounds(600,0, 150, 50);

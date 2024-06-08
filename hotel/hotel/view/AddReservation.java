@@ -226,7 +226,7 @@ public class AddReservation extends JFrame implements ActionListener{
 				ReservationManager reservationManager = ManagerManager.getReservationManager();
 				RoomType roomType = ManagerManager.getRoomTypeManager().getRoomType(String.valueOf(roomTypeCombobox.getSelectedItem()));
 				Guest guest = ManagerManager.getGuestManager().find(username);
-				ManagerManager.getReservationManager().add(LocalDate.parse(startDatePicker.getJFormattedTextField().getText()), LocalDate.parse(endDatePicker.getJFormattedTextField().getText()),null, roomType, guest, selectedServices, ReservationStatus.ON_HOLD, username, false);
+				reservationManager.add(LocalDate.parse(startDatePicker.getJFormattedTextField().getText()), LocalDate.parse(endDatePicker.getJFormattedTextField().getText()),null, roomType, guest, selectedServices, ReservationStatus.ON_HOLD, username, false);
 
 				this.dispose();
 			};

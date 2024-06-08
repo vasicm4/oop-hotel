@@ -100,6 +100,21 @@ public class ReservationManager {
 		return reservationsFound;
 	}
 	
+	public HashMap<Room, Integer> getRoomCount(LocalDate startDate, LocalDate endDate){
+		HashMap<Room, Integer> roomCount = new HashMap<Room, Integer>();
+		for (Reservation reservation : reservations.values()) {
+			if (reservation.getCheckIn().compareTo(startDate) >= 0
+					&& reservation.getCheckOut().compareTo(endDate) <= 0) {
+				if (roomCount.containsKey(reservation.getRoom())) {
+					roomCount.put(reservation.getRoom(), roomCount.get(reservation.getRoom()) + 1);
+				} else {
+					roomCount.put(reservation.getRoom(), 1);
+				}
+			}
+		}
+		return roomCount;
+	}
+	
 	public Reservation findReservation(Guest guest, LocalDate CheckIn,LocalDate CheckOut) {
 		for (Reservation reservation :reservations.values()) {
 			if (reservation.getGuest().equals(guest) && reservation.getCheckIn().compareTo(CheckIn)==0  && reservation.getCheckOut().compareTo(CheckOut)==0 && !reservation.isDeleted()) {
