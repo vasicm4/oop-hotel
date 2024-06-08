@@ -15,6 +15,7 @@ import java.util.Properties;
 
 import javax.swing.JButton;
 import javax.swing.JComboBox;
+import javax.swing.JFormattedTextField.AbstractFormatter;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JMenu;
@@ -25,7 +26,6 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
-import javax.swing.JFormattedTextField.AbstractFormatter;
 
 import org.jdatepicker.impl.JDatePanelImpl;
 import org.jdatepicker.impl.JDatePickerImpl;
@@ -44,6 +44,7 @@ import manager.RoomManager;
 import rooms.Reservation;
 import rooms.ReservationStatus;
 import rooms.Room;
+import rooms.RoomStatus;
 import rooms.RoomType;
 import users.Admin;
 import users.Agent;
@@ -845,22 +846,35 @@ public class AdminJFrame extends JFrame implements ActionListener{
 			try {
 				int row = table.getSelectedRow();
 				String roomNumber = String.valueOf(table.getValueAt(row, 0));
-				JFrame addRoomFrame = new JFrame();
-				JPanel addRoomPanel = new JPanel();
-				addRoomFrame.add(addRoomPanel);
-				addRoomPanel.setBorder(javax.swing.BorderFactory.createTitledBorder("Add Room"));
+				JFrame editRoomFrame = new JFrame();
+				JPanel editRoomPanel = new JPanel();
+				editRoomFrame.add(editRoomPanel);
+				editRoomPanel.setBorder(javax.swing.BorderFactory.createTitledBorder("Add Room"));
 				JComboBox<String> roomTypeCombobox = new JComboBox<String>();
 				for (RoomType roomType : ManagerManager.getRoomTypeManager().getAvailableRoomTypes().values()) {
 					roomTypeCombobox.addItem(roomType.toString());
 				}
-				addRoomPanel.add(roomTypeCombobox);
+				JComboBox<String> roomStatusCombobox = new JComboBox<String>();
+				for (RoomStatus roomStatus : RoomStatus.values()) {
+					roomStatusCombobox.addItem(roomStatus.toString());
+				}
+				roomTypeCombobox.setSelectedItem(String.valueOf(table.getValueAt(row, 1)));
+				roomStatusCombobox.setSelectedItem(String.valueOf(table.getValueAt(row, 3)));
+				editRoomPanel.add(roomStatusCombobox);
+				
+				editRoomPanel.add(roomTypeCombobox);
 				JButton buttonSubmit = new JButton("Submit");
-				addRoomPanel.add(buttonSubmit);
+				editRoomPanel.add(buttonSubmit);
 				buttonSubmit.addActionListener(ActionEvent2 -> {
 					RoomManager roomManager = ManagerManager.getRoomManager();
 					RoomType roomType = ManagerManager.getRoomTypeManager().getRoomType(roomTypeCombobox.getSelectedItem().toString());
 					roomManager.find(Integer.parseInt(roomNumber)).setType(roomType);
-					addRoomFrame.dispose();
+					roomManager.find(Integer.parseInt(roomNumber)).setStatus(RoomStatus.valueOf(roomStatusCombobox.getSelectedItem().toString()));
+					if (roomStatusCombobox.getSelectedItem().toString().equals("CLEANED")) {
+						String janitor = ManagerManager.getCleaningManager().findFreeJanitor();
+						ManagerManager.getCleaningManager().addDailyTask( janitor, roomManager.find(Integer.parseInt(roomNumber)));
+					}
+					editRoomFrame.dispose();
 					this.remove(tablePanel);
 					tablePanel = new JPanel();
 					this.tableRooms();
@@ -869,11 +883,11 @@ public class AdminJFrame extends JFrame implements ActionListener{
 					this.setVisible(true);
 				});
 				
-				addRoomPanel.setLayout(new GridLayout(2, 1));
-				addRoomPanel.setBorder(javax.swing.BorderFactory.createTitledBorder("Add Room"));
-				addRoomFrame.setSize(200, 200);
-				addRoomFrame.setLocationRelativeTo(null);
-				addRoomFrame.setVisible(true);		
+				editRoomPanel.setLayout(new GridLayout(3, 1));
+				editRoomPanel.setBorder(javax.swing.BorderFactory.createTitledBorder("Add Room"));
+				editRoomFrame.setSize(200, 200);
+				editRoomFrame.setLocationRelativeTo(null);
+				editRoomFrame.setVisible(true);		
 			} catch (Exception e) {
                 JOptionPane.showMessageDialog(null, "Please select a room to edit");
             }
@@ -1137,18 +1151,67 @@ public class AdminJFrame extends JFrame implements ActionListener{
 			this.setVisible(true);
 		});
 		
-		JButton addCleaningList = new JButton("Add new");
-		addCleaningList.setBounds(120,0, 100, 50);
-		addCleaningList.addActionListener(ActionEvent -> {
-			//TODO implement add cleaning list
-		});
-		upperPanel.add(addCleaningList);
+//		JButton addCleaningList = new JButton("Add new");
+//		addCleaningList.setBounds(120,0, 100, 50);
+//		addCleaningList.addActionListener(ActionEvent -> {
+//			//TODO implement add cleaning list
+//		});
+//		upperPanel.add(addCleaningList);
 		
 		JButton editCleaningList = new JButton("Edit");
 		editCleaningList.setBounds(230,0, 100, 50);
 		upperPanel.add(editCleaningList);
 		editCleaningList.addActionListener(ActionEvent -> {
-			// TODO implement edit cleaning list
+			try {
+                int row = table.getSelectedRow();
+                String janitorMain = String.valueOf(table.getValueAt(row, 0));
+                Room room = ManagerManager.getRoomManager().find(Integer.parseInt(String.valueOf(table.getValueAt(row, 1))));
+                ArrayList<Room> rooms = ManagerManager.getCleaningManager().getRoomsToBeCleaned().get(janitorMain);
+				JFrame changeCleaningListFrame = new JFrame();
+				JPanel janitors = new JPanel();
+				janitors.setBorder(javax.swing.BorderFactory.createTitledBorder("Janitors"));
+				JComboBox<String> janitorCombobox = new JComboBox<String>();
+				for (Janitor janitor : ManagerManager.janitorManager.getJanitors().values()) {
+					janitorCombobox.addItem(janitor.getUsername());
+				}
+				janitors.add(janitorCombobox);
+				changeCleaningListFrame.add(janitors);
+				JPanel buttonPanel = new JPanel();
+				buttonPanel.setLayout(new GridLayout(2, 1));
+				error = new JLabel("");
+				error.setFont(new java.awt.Font("Tahoma", 1, 25));
+				error.setForeground(java.awt.Color.red);
+				error.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+				buttonPanel.add(error);
+				JButton buttonSubmit = new JButton("Submit");
+				buttonPanel.add(buttonSubmit);
+				changeCleaningListFrame.add(buttonPanel);
+				buttonSubmit.addActionListener(ActionEvent2 -> {
+					if (validateInput()) {
+						if (janitorMain.equals(janitorCombobox.getSelectedItem().toString())) {
+							error.setText("Please select a different janitor");
+							return;
+						}
+						String newJanitor = janitorCombobox.getSelectedItem().toString();
+						HashMap<String, ArrayList<Room>> roomsToBeCleaned = ManagerManager.getCleaningManager().getRoomsToBeCleaned();
+						if (!roomsToBeCleaned.get(janitorMain).isEmpty()) {
+							roomsToBeCleaned.remove(room);
+						} 
+						if (!roomsToBeCleaned.containsKey(newJanitor)) {
+							roomsToBeCleaned.put(newJanitor, new ArrayList<Room>());
+						} else {
+							roomsToBeCleaned.get(newJanitor).add(room);
+						}
+					}
+				});
+				changeCleaningListFrame.setLayout(new GridLayout(3, 1));
+				changeCleaningListFrame.setSize(200, 200);
+				changeCleaningListFrame.setLocationRelativeTo(null);
+				changeCleaningListFrame.setVisible(true);
+			} catch (Exception e) {
+				JOptionPane.showMessageDialog(null, "Please select a row to edit");
+			}
+			
 		});
 		
 		JButton deleteRoom = new JButton("Delete");

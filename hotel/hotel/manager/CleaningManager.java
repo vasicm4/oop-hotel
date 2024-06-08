@@ -54,6 +54,8 @@ public class CleaningManager {
 		this.addRoom(username, String.valueOf(LocalDate.now()), room);
 	}
 	
+	
+	
 	public void addRoom(String username,String date, Room room) {
 		if (!janitorByDate.containsKey(username)) {
 			janitorByDate.put(username, new HashMap<String, ArrayList<Room>>());
