@@ -80,7 +80,7 @@ public class Reservation {
 		}
 		//TODO implement price change by date
 		int days = CheckOut.getDayOfYear() - CheckIn.getDayOfYear();
-		PriceList priceList = priceListManager.find(CheckIn, CheckOut);
+		PriceList priceList = priceListManager.findRange(CheckIn, CheckOut);
 		price += priceList.getRoomPrice(roomType);
 		for (Service service : services) {
 			price += priceList.getServicePrice(service);

@@ -54,7 +54,8 @@ public class ReservationManager {
 	}
 
 	public void add(LocalDate CheckIn, LocalDate CheckOut, RoomType roomType, Guest guest,
-			ArrayList<Service> services, ReservationStatus status, String id, boolean deleted) {
+ArrayList<Service> services, ReservationStatus status, boolean deleted) {
+		String id = this.generateId();
 		this.reservations.put(id, new Reservation(CheckIn, CheckOut, roomType, guest, services, status, id, deleted));
 	}
 

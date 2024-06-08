@@ -44,6 +44,17 @@ public class PriceListManager {
 		return null;
 	}
 	
+	public PriceList findRange(LocalDate startDate, LocalDate endDate) {
+		for (PriceList priceList : priceLists.values()) {
+			if (priceList.getStartDate().isBefore(startDate) && priceList.getEndDate().isAfter(endDate)
+					&& !priceList.isDeleted()) {
+				return priceList;
+			}
+		}
+		System.out.println("Price list not found");
+		return null;
+	}
+	
 	public int generateID() {
 		if ( priceLists.size() == 0) {
 			return 1;

@@ -453,6 +453,7 @@ public class AgentJFrame extends JFrame implements ActionListener{
 			this.remove(tablePanel);
 			tablePanel = new JPanel();
 			this.tableReservations();
+			this.add(upperPanel, BorderLayout.NORTH);
 			this.add(tablePanel, BorderLayout.CENTER);
 			this.repaint();
 			this.setVisible(true);
@@ -533,18 +534,27 @@ public class AgentJFrame extends JFrame implements ActionListener{
 			});
 		});
 		
+		this.remove(tablePanel);
+		tablePanel = new JPanel();
+		this.tableDailyOccupancy(LocalDate.now());
+		this.add(upperPanel, BorderLayout.NORTH);
+		this.add(tablePanel, BorderLayout.CENTER);
+		this.repaint();
+		
 		JButton buttonRefresh = new JButton("Refresh");
 		buttonRefresh.setBounds(240,0, 100, 50);
 		upperPanel.add(buttonRefresh);
 		buttonRefresh.addActionListener(ActionEvent -> {
 			this.remove(tablePanel);
 			tablePanel = new JPanel();
-			this.tableReservations();
+			this.add(upperPanel, BorderLayout.NORTH);
+			this.tableDailyOccupancy(LocalDate.now());
 			this.add(tablePanel, BorderLayout.CENTER);
 			this.repaint();
 			this.setVisible(true);
 		});
 	}
+
 	
 	public void roomsPage() {
 		JButton buttonRefresh = new JButton("Refresh");
@@ -553,7 +563,8 @@ public class AgentJFrame extends JFrame implements ActionListener{
 		buttonRefresh.addActionListener(ActionEvent -> {
 			this.remove(tablePanel);
 			tablePanel = new JPanel();
-			this.tableReservations();
+			this.tableRooms();
+			this.add(upperPanel, BorderLayout.NORTH);
 			this.add(tablePanel, BorderLayout.CENTER);
 			this.repaint();
 			this.setVisible(true);
