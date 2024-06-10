@@ -93,8 +93,9 @@ public class RoomTypeManager {
             for (RoomType roomType : roomTypes.values()) {
                 writer.write(roomType.getType() + "," + String.valueOf(roomType.getCapacity()) + "," + String.valueOf(roomType.isDeleted()) + "\n");
             }
+			writer.flush();
 		} catch (Exception e) {
-			System.out.println("Error writing to file");
+			System.out.println("Error writing to file" + fileName);
 		}
 	}	
 }

@@ -85,9 +85,9 @@ public class GuestManager {
 			for (Guest guest : guests.values()) {
 				writer.write(guest.getUsername() + "," + guest.getPassword() + "," + guest.getName() + "," + guest.getSurname() + "," + guest.getDateOfBirth().toString() + "," + String.valueOf(guest.getPhoneNumber()) + "," + String.valueOf(guest.getGender()) + "," + String.valueOf(guest.isDeleted()) +"\n");
 			}
-			// write data to file
+			writer.flush();
 		} catch (Exception e) {
-			System.out.println("Error writing to file");
+			System.out.println("Error writing to file" + fileName);
 		}
 	}
 	

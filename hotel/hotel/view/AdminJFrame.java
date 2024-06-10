@@ -5,10 +5,13 @@ import java.awt.Dimension;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Properties;
@@ -288,10 +291,27 @@ public class AdminJFrame extends JFrame implements ActionListener{
 		
 		} else if (type.equals("room")) {
 			ReservationManager reservationManager = ManagerManager.reservationManager;
-			String[] columnNames = {"Number", "Type", "Count", "Revenue"};
+			String[] columnNames = {"Number", "Type", "Number of nights", "Revenue"};
 			HashMap<Room, Integer> roomsCount = reservationManager.getRoomCount(startDate, endDate);
-//			HashMap<Room, Double> roomsRevenue = reservationManager.getRoomRevenue(startDate, endDate);
-			//TODO make table
+			HashMap<Room, Double> roomsRevenue = reservationManager.getRoomsRevenue(startDate, endDate);
+			String[][] data = new String[ManagerManager.getRoomManager().getRooms().size()][4];
+			int i = 0;
+			for (Room room : roomsCount.keySet()) {
+				if (room == null) {
+					continue;
+				}
+				data[i][0] = String.valueOf(room.getNumber());
+				data[i][1] = room.getType().getType();
+				if (roomsCount.get(room) == 0) {
+					data[i][2] = "0";
+					data[i][3] = "0";
+				} else {
+					data[i][2] = String.valueOf(roomsCount.get(room));
+					data[i][3] = String.valueOf(roomsRevenue.get(room));
+				}
+				i++;
+			}
+			table = new JTable(data, columnNames);
 			
 		}
 		
@@ -400,15 +420,16 @@ public class AdminJFrame extends JFrame implements ActionListener{
 		tablePanel = new JPanel();
 		table = new JTable();
 		table.setDefaultEditor(Object.class, null);
-		String[] columnNames = {"Room Number", "Room Type", "Floor", "Status"};
+		String[] columnNames = {"Room Number", "Room Type", "Floor", "Additional Services", "Status"};
 		HashMap<String,Room> rooms = ManagerManager.roomManager.getRooms();
-		String[][] data = new String[rooms.size()][4];
+		String[][] data = new String[rooms.size()][5];
 		int i = 0;
 		for (Room room : rooms.values()) {
 			data[i][0] = String.valueOf(room.getNumber());
 			data[i][1] = String.valueOf(room.getType());
 			data[i][2] = String.valueOf(room.getFloor());
-			data[i][3] = String.valueOf(room.getStatus());
+			data[i][3] = String.valueOf(room.getAdditionalServices());
+			data[i][4] = String.valueOf(room.getStatus());
 			i++;
 		}
 		table = new JTable(data, columnNames);
@@ -521,10 +542,10 @@ public class AdminJFrame extends JFrame implements ActionListener{
 		String[] columnNames = { "Username", "Start Date", "End Date", "Room", "RoomType", "Status", "Services", "Price"};
 
 		ReservationManager reservationManager = ManagerManager.reservationManager;
-		HashMap<String, Reservation> reservations = reservationManager.getAvailableReservations();
+		ArrayList<Reservation> reservations = reservationManager.getAvailableReservations();
 		String[][] data = new String[reservations.size()][8];
 		int i = 0;
-		for (Reservation reservation : reservations.values()) {
+		for (Reservation reservation : reservations) {
 			data[i][0] = reservation.getGuest().getUsername();
 			data[i][1] = reservation.getCheckIn().toString();
 			data[i][2] = reservation.getCheckOut().toString();
@@ -558,6 +579,7 @@ public class AdminJFrame extends JFrame implements ActionListener{
 			this.remove(tablePanel);
 			tablePanel = new JPanel();
 			this.tableUser();
+			this.add(upperPanel, BorderLayout.NORTH);
 			this.add(tablePanel, BorderLayout.CENTER);
 			this.repaint();
 			this.setVisible(true);
@@ -808,20 +830,44 @@ public class AdminJFrame extends JFrame implements ActionListener{
 		addRoom.setBounds(120,0, 100, 50);
 		addRoom.addActionListener(ActionEvent -> {
 			JFrame addRoomFrame = new JFrame();
+			
 			JPanel addRoomPanel = new JPanel();
-			addRoomFrame.add(addRoomPanel);
 			addRoomPanel.setBorder(javax.swing.BorderFactory.createTitledBorder("Add Room"));
 			JComboBox<String> roomTypeCombobox = new JComboBox<String>();
 			for (RoomType roomType : ManagerManager.getRoomTypeManager().getAvailableRoomTypes().values()) {
 				roomTypeCombobox.addItem(roomType.toString());
 			}
 			addRoomPanel.add(roomTypeCombobox);
+			addRoomFrame.add(addRoomPanel);
+			
+			JPanel addFloorPanel = new JPanel();
+			JTextField floorTextField = new JTextField();
+			floorTextField.setPreferredSize(new Dimension(200, 30));
+			floorTextField.setFont(new java.awt.Font("Tahoma", 1, 25));
+			addFloorPanel.add(floorTextField);
+			addFloorPanel.setBorder(javax.swing.BorderFactory.createTitledBorder("Floor"));
+			addRoomFrame.add(addFloorPanel);
+			
+			JPanel addServicesPanel = new JPanel();
+			JTextField servicesTextField = new JTextField();
+			servicesTextField.setPreferredSize(new Dimension(200, 30));
+			servicesTextField.setFont(new java.awt.Font("Tahoma", 1, 25));
+			addServicesPanel.setBorder(javax.swing.BorderFactory.createTitledBorder("Additional Services"));
+			addServicesPanel.add(servicesTextField);
+			addRoomFrame.add(addServicesPanel);
+			
+			JPanel buttonPanel = new JPanel();
 			JButton buttonSubmit = new JButton("Submit");
-			addRoomPanel.add(buttonSubmit);
+			buttonPanel.add(buttonSubmit);
 			buttonSubmit.addActionListener(ActionEvent2 -> {
 				RoomManager roomManager = ManagerManager.getRoomManager();
 				RoomType roomType = ManagerManager.getRoomTypeManager().getRoomType(roomTypeCombobox.getSelectedItem().toString());
-				roomManager.add(roomType, 1);
+				ArrayList<String> services = new ArrayList<String>(Arrays.asList(servicesTextField.getText().split(",")));
+				try {
+					roomManager.add(roomType, Integer.parseInt(floorTextField.getText()), services);
+				} catch (Exception e) {
+					JOptionPane.showMessageDialog(null, "Please enter a valid floor number");
+				}
 				addRoomFrame.dispose();
 				this.remove(tablePanel);
 				tablePanel = new JPanel();
@@ -830,10 +876,11 @@ public class AdminJFrame extends JFrame implements ActionListener{
 				this.repaint();
 				this.setVisible(true);
 			});
-			
-			addRoomPanel.setLayout(new GridLayout(2, 1));
 			addRoomPanel.setBorder(javax.swing.BorderFactory.createTitledBorder("Add Room"));
-			addRoomFrame.setSize(200, 200);
+			addRoomFrame.add(buttonPanel);
+			
+			addRoomFrame.setLayout(new GridLayout(4, 1));
+			addRoomFrame.setSize(400, 400);
 			addRoomFrame.setLocationRelativeTo(null);
 			addRoomFrame.setVisible(true);
 		});
@@ -1135,7 +1182,7 @@ public class AdminJFrame extends JFrame implements ActionListener{
 	    });
 		upperPanel.add(logoutButton);
 		
-		tablePanel = new JPanel();
+		updateTablePanel();
 	};
 	
 	public void cleaningListPage() {
@@ -1145,7 +1192,7 @@ public class AdminJFrame extends JFrame implements ActionListener{
 		buttonRefresh.addActionListener(ActionEvent -> {
 			this.remove(tablePanel);
 			tablePanel = new JPanel();
-			this.tableRooms();
+			this.tableCleaning();
 			this.add(tablePanel, BorderLayout.CENTER);
 			this.repaint();
 			this.setVisible(true);
@@ -1365,7 +1412,21 @@ public class AdminJFrame extends JFrame implements ActionListener{
 		this.setSize(1080, 720);
 		this.setVisible(true);
 		this.setResizable(true);
-		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		this.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+		this.addWindowListener(new WindowAdapter() {
+			@Override
+			public void windowClosing(WindowEvent e) {
+				int reply = JOptionPane.showConfirmDialog(null, "Do you want to save the changes?");
+				if (reply == JOptionPane.YES_OPTION) {
+					ManagerManager.saveServices();
+					setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+				} else if (reply == JOptionPane.NO_OPTION){
+					setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+				} else {
+                   setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+				}
+			}
+		});
 		this.getContentPane().setBackground(new java.awt.Color(222, 224, 223));
 		this.setLocationRelativeTo(null);
 		this.setLayout(new BorderLayout());
@@ -1458,6 +1519,5 @@ public class AdminJFrame extends JFrame implements ActionListener{
 		}
 		
 		this.screenManager();
-
 	}
 }

@@ -95,9 +95,9 @@ public class AgentManager {
 			for (Agent agent : agents.values()) {
 				writer.write(agent.getUsername() + "," + agent.getPassword() + "," + agent.getName() + "," + agent.getSurname() + "," + agent.getDateOfBirth().toString() + "," + String.valueOf(agent.getPhoneNumber()) + "," + String.valueOf(agent.getGender()) + "," + String.valueOf(agent.getEducationLevel()) + "," + String.valueOf(agent.getExperience()) + "," + String.valueOf(agent.getBaseSalary()) +"," + String.valueOf(agent.isDeleted()) + "\n");
 			}
-			// write data to file
+			writer.flush();
 		} catch (Exception e) {
-			System.out.println("Error writing to file");
+			System.out.println("Error writing to file" + fileName);
 		}
 	}
 	

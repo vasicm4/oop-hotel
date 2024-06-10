@@ -81,8 +81,9 @@ public class ServiceManager {
 			for (Service service: services.values()) {
 				writer.write(service.getType() + "," + service.isDeleted() + "\n");
 			}
+			writer.flush();
 		}catch(Exception e) {
-			System.out.println("Writer");
+			System.out.println("Error writing to file" + this.fileName);
 		}
 
 	}

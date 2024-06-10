@@ -5,6 +5,7 @@ import java.io.BufferedWriter;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
+import java.util.ArrayList;
 import java.util.HashMap;
 
 import rooms.Room;
@@ -67,17 +68,25 @@ public class RoomManager {
 		return number;
 	}
 	
-	public void add(RoomType type, int number, int floor) {
-		this.rooms.put(String.valueOf(number),new Room(type, number, floor));
-	}
-	
-	public void add(RoomType type, int floor) {
-		this.rooms.put(String.valueOf(this.generateNumber()), new Room(type, this.generateNumber(), floor));
+	public void add(RoomType type, int floor, ArrayList<String> additionalServices) {
+		this.rooms.put(String.valueOf(this.generateNumber()), new Room(type, this.generateNumber(), floor, additionalServices));
 	}
 	
 	
-	public void add(RoomType type, int number, int floor, RoomStatus status, boolean deleted) {
-		this.rooms.put(String.valueOf(number),new Room(type, number, floor, status, deleted));
+	public void add(RoomType type, int number, int floor, RoomStatus status, ArrayList<String> additionalServices, boolean deleted) {
+		this.rooms.put(String.valueOf(number),new Room(type, number, floor, status, additionalServices, deleted));
+	}
+	
+	public ArrayList<String> getAllAdditionalServices(){
+		ArrayList<String> additionalServices = new ArrayList<String>();
+		for (Room room : rooms.values()) {
+			for (String service : room.getAdditionalServices()) {
+				if (!additionalServices.contains(service)) {
+					additionalServices.add(service);
+				}
+			}
+		}
+		return additionalServices;
 	}
 	
 	public void remove(Room room) {
@@ -89,8 +98,38 @@ public class RoomManager {
 		room.setNumber(number);
 		room.setFloor(floor);
 		room.setStatus(status);
+		
 	}
 	
+	public ArrayList<String> findRoomTypes(ArrayList<String> additionalServices) {
+		ArrayList<String> roomTypes = new ArrayList<String>();
+		for (Room room : rooms.values()) {
+			if (room.getAdditionalServices().containsAll(additionalServices)) {
+				roomTypes.add(room.getType().toString());
+			}
+		}
+		return roomTypes;
+	}
+	
+	
+	public ArrayList<String> readAdditionalServices(String roomNumber) {
+		try {
+			BufferedReader reader = new BufferedReader(new FileReader(filePath + "additionalServices.csv"));
+			String line;
+			ArrayList<String> additionalServices = new ArrayList<String>();
+			while ((line = reader.readLine()) != null) {
+				String[] data = line.split(",");
+				if (data[0].equals(roomNumber)) {
+					additionalServices.add(data[1]);
+				}
+			}
+			reader.close();
+			return additionalServices;
+		} catch (Exception e) {
+			System.out.println("Error reading file additionalServices.csv");
+			return null;
+		}
+	}
 	
 	public void readData(RoomTypeManager roomTypeManager) {
 		try {
@@ -98,7 +137,8 @@ public class RoomManager {
 			String line;
 			while ((line = reader.readLine()) != null) {
 				String[] data = line.split(",");
-				this.add(roomTypeManager.get(data[0]), Integer.parseInt(data[1]), Integer.parseInt(data[2]), RoomStatus.getStatus(data[3]) ,  Boolean.parseBoolean(data[3]));
+				ArrayList<String> additionalServices = this.readAdditionalServices(data[1]);
+				this.add(roomTypeManager.get(data[0]), Integer.parseInt(data[1]), Integer.parseInt(data[2]), RoomStatus.getStatus(data[3]), additionalServices,  Boolean.parseBoolean(data[3]));
 			}
 			
 		} catch (FileNotFoundException e) {
@@ -108,14 +148,30 @@ public class RoomManager {
 		}
 	}
 	
+	public void writeAdditionalServices() {
+		try {
+			BufferedWriter writer = new BufferedWriter(new FileWriter(filePath + "additionalServices.csv"));
+			for (Room room : rooms.values()) {
+				for (String service : room.getAdditionalServices()) {
+					writer.write(String.valueOf(room.getNumber()) + "," + service + "\n");
+				}
+			}
+			writer.flush();
+		} catch (Exception e) {
+			System.out.println("Error writing file additionalServices.csv");
+		}
+	}
+	
 	public void writeData() {
 		try {
-			BufferedWriter writer = new BufferedWriter(new FileWriter(filePath + fileName));	
+			BufferedWriter writer = new BufferedWriter(new FileWriter(filePath + fileName));
+			this.writeAdditionalServices();
 			for (Room room : rooms.values()) {
 				writer.write(room.getType() + "," + String.valueOf(room.getNumber()) + "," + String.valueOf(room.getFloor()) + "," + RoomStatus.getStatus(room.getStatus()) + "," + String.valueOf(room.isDeleted()) + "\n");
 			}
+			writer.flush();
 		} catch(Exception e){
-			System.out.println("error");
+			System.out.println("error" + fileName);
 		}
 	}
 

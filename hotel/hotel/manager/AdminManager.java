@@ -109,9 +109,9 @@ public class AdminManager {
 			for (Admin admin : admins.values()) {
 				writer.write(admin.getUsername() + "," + admin.getPassword() + "," + admin.getName() + "," + admin.getSurname() + "," + admin.getDateOfBirth().toString() + "," + String.valueOf(admin.getPhoneNumber()) + "," + String.valueOf(admin.getGender()) + "," + String.valueOf(admin.getEducationLevel()) + "," + String.valueOf(admin.getExperience()) + "," + String.valueOf(admin.getBaseSalary()) + "," + String.valueOf(admin.isDeleted()) + "\n");
 			}
-			// write data to file
+			writer.flush();
 		} catch (Exception e) {
-			System.out.println("Error writing to file");
+			System.out.println("Error writing to file" + fileName);
 		}
 	}
 	

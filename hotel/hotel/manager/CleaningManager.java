@@ -90,7 +90,7 @@ public class CleaningManager {
 			int count = 0;
 			for (String date : this.janitorByDate.get(janitor).keySet()) {
 				LocalDate localDate = LocalDate.parse(date);
-				if (localDate.isAfter(startDate) && localDate.isBefore(endDate)) {
+				if (!localDate.isBefore(startDate) && !localDate.isAfter(endDate)) {
 					count += this.janitorByDate.get(janitor).get(date).size();
 				}
 			}
@@ -189,9 +189,11 @@ public class CleaningManager {
                     }
                 }
             }
+			writer.flush();
 		} catch (Exception e) {
 			System.out.println("Error writing to file");
-		}	}
+		}	
+	}
 	
 	
 	

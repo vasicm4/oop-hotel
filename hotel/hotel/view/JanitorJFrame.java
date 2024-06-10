@@ -5,6 +5,8 @@ import java.awt.Dimension;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -109,7 +111,21 @@ public JanitorJFrame(ManagerManager managerManager, String username){
 		this.setSize(1080, 720);
 		this.setVisible(true);
 		this.setResizable(true);
-		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		this.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+		this.addWindowListener(new WindowAdapter() {
+			@Override
+			public void windowClosing(WindowEvent e) {
+				int reply = JOptionPane.showConfirmDialog(null, "Do you want to save the changes?");
+				if (reply == JOptionPane.YES_OPTION) {
+					ManagerManager.saveServices();
+					setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+				} else if (reply == JOptionPane.NO_OPTION){
+					setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+				} else {
+                   setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+				}
+			}
+		});
 		this.getContentPane().setBackground(new java.awt.Color(222, 224, 223));
 		this.setLocationRelativeTo(null);
 		this.setLayout(new java.awt.BorderLayout());

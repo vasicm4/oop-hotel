@@ -95,9 +95,9 @@ public class JanitorManager {
 			for (Janitor janitor : janitors.values()) {
 				writer.write(janitor.getUsername() + "," + janitor.getPassword() + "," + janitor.getName() + "," + janitor.getSurname() + "," + janitor.getDateOfBirth().toString() + "," + String.valueOf(janitor.getPhoneNumber()) + "," + String.valueOf(janitor.getGender()) + "," + String.valueOf(janitor.getEducationLevel()) + "," + String.valueOf(janitor.getExperience()) + "," + String.valueOf(janitor.getBaseSalary()) + "," + String.valueOf(janitor.isDeleted()) + "\n");
 			}
-			// write data to file
+			writer.flush();
 		} catch (Exception e) {
-			System.out.println("Error writing to file");
+			System.out.println("Error writing to file" + fileName);
 		}
 	}
 	

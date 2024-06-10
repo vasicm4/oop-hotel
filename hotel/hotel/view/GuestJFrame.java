@@ -5,6 +5,8 @@ import java.awt.Dimension;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -80,10 +82,10 @@ public class GuestJFrame extends JFrame implements ActionListener{
 			new AddReservation(managerManager, username, data);
 		});
 		
-		JButton buttonEdit = new JButton("Cancel reservation");
-		buttonEdit.setBounds(20,0, 100, 50);
-		upperPanel.add(buttonEdit);
-		buttonEdit.addActionListener(ActionEvent -> {
+		JButton buttonCancel = new JButton("Cancel reservation");
+		buttonCancel.setBounds(20,0, 100, 50);
+		upperPanel.add(buttonCancel);
+		buttonCancel.addActionListener(ActionEvent -> {
 			try {
 				AbstractTableModel model = (AbstractTableModel) table.getModel();
 				int selectedRow = table.getSelectedRow();
@@ -121,7 +123,21 @@ public class GuestJFrame extends JFrame implements ActionListener{
 		this.setSize(1080, 720);
 		this.setVisible(true);
 		this.setResizable(true);
-		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		this.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+		this.addWindowListener(new WindowAdapter() {
+			@Override
+			public void windowClosing(WindowEvent e) {
+				int reply = JOptionPane.showConfirmDialog(null, "Do you want to save the changes?");
+				if (reply == JOptionPane.YES_OPTION) {
+					ManagerManager.saveServices();
+					setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+				} else if (reply == JOptionPane.NO_OPTION){
+					setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+				} else {
+                   setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+				}
+			}
+		});
 		this.getContentPane().setBackground(new java.awt.Color(222, 224, 223));
 		this.setLocationRelativeTo(null);
 		this.setLayout(new BorderLayout());

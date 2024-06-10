@@ -79,11 +79,11 @@ ArrayList<Service> services, ReservationStatus status, boolean deleted) {
 		return reservationsFound;
 	}
 	
-	public HashMap<String, Reservation> getAvailableReservations() {
-		HashMap<String, Reservation> reservationsFound = new HashMap<String, Reservation>();
+	public ArrayList<Reservation> getAvailableReservations() {
+		ArrayList<Reservation> reservationsFound = new ArrayList<Reservation>();
 		for (Reservation reservation : reservations.values()) {
 			if (!reservation.isDeleted()) {
-				reservationsFound.put(reservation.getId(), reservation);
+				reservationsFound.add(reservation);
 			}
 		}
 		return reservationsFound;
@@ -104,13 +104,18 @@ ArrayList<Service> services, ReservationStatus status, boolean deleted) {
 	public HashMap<Room, Integer> getRoomCount(LocalDate startDate, LocalDate endDate){
 		HashMap<Room, Integer> roomCount = new HashMap<Room, Integer>();
 		for (Reservation reservation : reservations.values()) {
-			if (reservation.getCheckIn().compareTo(startDate) >= 0
-					&& reservation.getCheckOut().compareTo(endDate) <= 0) {
+			if (reservation.getCheckIn().compareTo(startDate) >= 0 && reservation.getCheckOut().compareTo(endDate) <= 0) {
 				if (roomCount.containsKey(reservation.getRoom())) {
 					roomCount.put(reservation.getRoom(), roomCount.get(reservation.getRoom()) + 1);
 				} else {
 					roomCount.put(reservation.getRoom(), 1);
 				}
+			}
+		}
+		for (Room room : ManagerManager.getRoomManager().getRooms().values()) {
+			System.out.println(room);
+			if (roomCount.get(room) == null) {
+				roomCount.put(room, 0);
 			}
 		}
 		return roomCount;
@@ -176,6 +181,21 @@ ArrayList<Service> services, ReservationStatus status, boolean deleted) {
 	    return null;
 	}
 	
+	public HashMap<Room,Double> getRoomsRevenue(LocalDate startDate, LocalDate endDate){
+		HashMap<Room, Double> roomsRevenue = new HashMap<Room, Double>();
+		for (Reservation reservation : reservations.values()) {
+			if (reservation.getCheckIn().compareTo(startDate) >= 0
+					&& reservation.getCheckOut().compareTo(endDate) <= 0) {
+				if (roomsRevenue.containsKey(reservation.getRoom())) {
+					roomsRevenue.put(reservation.getRoom(), roomsRevenue.get(reservation.getRoom()) + reservation.getPrice(ManagerManager.getPriceListManager(), reservation.getRoomType()));
+				} else {
+					roomsRevenue.put(reservation.getRoom(), reservation.getPrice(ManagerManager.getPriceListManager(), reservation.getRoomType()));
+				}
+			}
+		}
+		return roomsRevenue;
+	}
+	
 	public void cancelExpiredReservations() {
 		for (Reservation reservation : reservations.values()) {
 			if (reservation.getCheckOut().isBefore(LocalDate.now()) && reservation.getStatus() == ReservationStatus.ON_HOLD) {
@@ -202,7 +222,7 @@ ArrayList<Service> services, ReservationStatus status, boolean deleted) {
 					writer.write(reservation.getId() + "," + service.getType() + "\n");
 				}
 			}
-			writer.close();
+			writer.flush();
 		} catch (Exception e) {
 			System.out.println("Error writing to file");
 		}
@@ -211,15 +231,21 @@ ArrayList<Service> services, ReservationStatus status, boolean deleted) {
 	public void writeData() {
 		try {
 			BufferedWriter writer = new BufferedWriter(new FileWriter(filePath + fileName));
+			this.writeServices();
 			for (Reservation reservation : reservations.values()) {
+				if (reservation.getRoom() == null) {
+                    writer.write(String.valueOf(reservation.getCheckIn()) + "," + String.valueOf(reservation.getCheckOut()) + ",null," + reservation.getRoomType().getType() + "," + String.valueOf(reservation.getGuest().getUsername()) + "," 
+                            + ReservationStatus.getStatus(reservation.getStatus()) + "," + String.valueOf(reservation.getId()) + "," + String.valueOf(reservation.isDeleted()) + "\n");
+                } else {
 				writer.write(String.valueOf(reservation.getCheckIn()) + "," + String.valueOf(reservation.getCheckOut()) + ","
 						+ String.valueOf(reservation.getRoom().getNumber()) + "," + reservation.getRoomType().getType() + "," + String.valueOf(reservation.getGuest().getUsername()) + "," 
-						+ ReservationStatus.getStatus(reservation.getStatus()) + "," + String.valueOf(reservation.getId()) + "," + reservation.isDeleted() + "\n");
-			}
+						+ ReservationStatus.getStatus(reservation.getStatus()) + "," + String.valueOf(reservation.getId()) + "," + String.valueOf(reservation.isDeleted()) + "\n");
+                }
+            }
+			writer.flush();
 		} catch (Exception e) {
-			System.out.println("Error writing to file" );
+			System.out.println("Error writing to file" + fileName);
 		}
-	
 	}
 	
 	

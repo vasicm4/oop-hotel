@@ -5,6 +5,8 @@ import java.awt.Dimension;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
@@ -15,6 +17,8 @@ import java.util.Properties;
 
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
+import javax.swing.JComboBox;
+import javax.swing.JFormattedTextField.AbstractFormatter;
 import javax.swing.JFrame;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
@@ -23,7 +27,6 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
-import javax.swing.JFormattedTextField.AbstractFormatter;
 import javax.swing.table.AbstractTableModel;
 
 import org.jdatepicker.impl.JDatePanelImpl;
@@ -55,12 +58,12 @@ public class AgentJFrame extends JFrame implements ActionListener{
 	ArrayList<String> data;
 	JTable table;
 	String screen = "reservations";
+	String filter = "";
 	
 	public JPanel tableGuests() {
 		tablePanel = new JPanel();
 		table = new JTable();
 		table.setDefaultEditor(Object.class, null);
-		
 		GuestManager guestManager = ManagerManager.guestManager;
 		String[] columnNames = new String[] {"Username","Password","First Name", "Last Name", "Date of Birth", "Phone", "Gender"};
 		HashMap<String, Guest> guests = guestManager.getGuests();
@@ -91,12 +94,13 @@ public class AgentJFrame extends JFrame implements ActionListener{
 		table = new JTable();
 		table.setDefaultEditor(Object.class, null);
 		String[] columnNames = { "Username", "Start Date", "End Date", "Room", "RoomType", "Status", "Services", "Price"};
-
+		
 		ReservationManager reservationManager = ManagerManager.reservationManager;
-		HashMap<String, Reservation> reservations = reservationManager.getAvailableReservations();
+		ArrayList<Reservation> reservations = reservationManager.getAvailableReservations();
 		String[][] data = new String[reservations.size()][8];
 		int i = 0;
-		for (Reservation reservation : reservations.values()) {
+		//TODO filtering
+		for (Reservation reservation : reservations) {
 			data[i][0] = reservation.getGuest().getUsername();
 			data[i][1] = reservation.getCheckIn().toString();
 			data[i][2] = reservation.getCheckOut().toString();
@@ -151,7 +155,6 @@ public class AgentJFrame extends JFrame implements ActionListener{
 			data[i][7] = String.valueOf(reservation.getPrice(ManagerManager.getPriceListManager(), reservation.getRoomType()));
 			i++;
 		}
-		//TODO add daily occupancy
 		data[reservations.size()][0] = "Daily Occupancy";
 		data[reservations.size()][7] = String.valueOf(reservationManager.getOccupiedRooms(date));
 		
@@ -166,15 +169,16 @@ public class AgentJFrame extends JFrame implements ActionListener{
 		tablePanel = new JPanel();
 		table = new JTable();
 		table.setDefaultEditor(Object.class, null);
-		String[] columnNames = {"Room Number", "Room Type", "Number of Beds", "Status"};
+		String[] columnNames = {"Room Number", "Room Type", "Number of Beds", "Additional services", "Status"};
 		HashMap<String,Room> rooms = ManagerManager.roomManager.getRooms();
-		String[][] data = new String[rooms.size()][4];
+		String[][] data = new String[rooms.size()][5];
 		int i = 0;
 		for (Room room : rooms.values()) {
 			data[i][0] = String.valueOf(room.getNumber());
 			data[i][1] = String.valueOf(room.getType());
 			data[i][2] = String.valueOf(room.getFloor());
-			data[i][3] = String.valueOf(room.getStatus());
+			data[i][3] = String.valueOf(room.getAdditionalServices());
+			data[i][4] = String.valueOf(room.getStatus());
 			i++;
 		}
 		table = new JTable(data, columnNames);
@@ -192,6 +196,7 @@ public class AgentJFrame extends JFrame implements ActionListener{
 		if (screen == "guests") {
 			tablePanel = tableGuests();
 		} else if (screen == "reservations") {
+			filter = "";
 			tablePanel = tableReservations();
 		} else if (screen == "rooms") {
 			tablePanel = tableRooms();
@@ -465,7 +470,27 @@ public class AgentJFrame extends JFrame implements ActionListener{
 		buttonFilter.setBounds(350,0, 100, 50);
 		upperPanel.add(buttonFilter);
 		buttonFilter.addActionListener(ActionEvent -> {
-			//TODO implement filter search
+			JFrame filterFrame = new JFrame();
+			JPanel filterPanel = new JPanel();
+			filterPanel.setBorder(javax.swing.BorderFactory.createTitledBorder("Filter"));
+			JComboBox<String> statusComboBox = new JComboBox<String>();
+			statusComboBox.addItem("Room Type");
+			statusComboBox.addItem("Room Number");
+			statusComboBox.addItem("Price");
+			statusComboBox.addItem("Service");
+			filterPanel.add(statusComboBox);
+			JPanel buttonPanel = new JPanel();
+			JButton buttonSubmit = new JButton("Submit");
+			buttonSubmit.addActionListener(statusCombobox -> {
+				filter = statusComboBox.getSelectedItem().toString();
+			});
+			buttonPanel.add(buttonSubmit);
+			filterFrame.add(filterPanel);
+			filterFrame.add(buttonPanel);
+			filterFrame.setLayout(new GridLayout(2, 1));
+			filterFrame.setSize(200, 200);
+			filterFrame.setLocationRelativeTo(null);
+			filterFrame.setVisible(true);
 		});
 			
 		JButton logoutButton = new JButton("Logout");
@@ -627,7 +652,21 @@ public class AgentJFrame extends JFrame implements ActionListener{
 		this.setSize(1080, 720);
 		this.setVisible(true);
 		this.setResizable(true);
-		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		this.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+		this.addWindowListener(new WindowAdapter() {
+			@Override
+			public void windowClosing(WindowEvent e) {
+				int reply = JOptionPane.showConfirmDialog(null, "Do you want to save the changes?");
+				if (reply == JOptionPane.YES_OPTION) {
+					ManagerManager.saveServices();
+					setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+				} else if (reply == JOptionPane.NO_OPTION){
+					setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+				} else {
+                   setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+				}
+			}
+		});
 		this.getContentPane().setBackground(new java.awt.Color(222, 224, 223));
 		this.setLocationRelativeTo(null);
 		this.setLayout(new BorderLayout());

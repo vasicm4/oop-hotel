@@ -1,26 +1,47 @@
 package rooms;
 
+import java.util.ArrayList;
+
 public class Room {
 	protected RoomType type;
 	protected int number;
 	protected int floor;
 	protected RoomStatus status;
 	protected boolean deleted;
+	protected ArrayList<String> additionalServices;
 	
-	public Room(RoomType type, int number, int floor) {
+	public Room(RoomType type, int number, int floor, ArrayList<String> additionalServices) {
 		this.type = type;
 		this.number = number;
 		this.floor = floor;
 		this.status = RoomStatus.AVAILABLE;
 		this.deleted = false;
+		this.additionalServices = additionalServices;
 	}
 	
-	public Room(RoomType type, int number, int floor, RoomStatus status, boolean deleted) {
+	public Room(RoomType type, int number, int floor, RoomStatus status, ArrayList<String> additionalServices, boolean deleted) {
 		this.type = type;
 		this.number = number;
 		this.floor = floor;
 		this.status = status;
+		this.additionalServices = additionalServices;
 		this.deleted = deleted;
+	}
+
+	public ArrayList<String> getAdditionalServices() {
+		return additionalServices;
+	}
+
+	public void setAdditionalServices(ArrayList<String> additionalServices) {
+		this.additionalServices = additionalServices;
+	}
+	
+	public void addService(String service) {
+		additionalServices.add(service);
+	}
+	
+	public void removeService(String service) {
+		additionalServices.remove(service);
 	}
 
 	public RoomStatus getStatus() {

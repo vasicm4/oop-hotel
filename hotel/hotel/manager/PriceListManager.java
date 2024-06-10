@@ -97,6 +97,7 @@ public class PriceListManager {
             for (Service service : services.keySet()) {
                 writer.write(String.valueOf(id) + "," + service.getType() + "," + String.valueOf(services.get(service)) + "\n");
             }
+            writer.flush();
         } catch (Exception e) {
             System.out.println("Error writing to file");
         }
@@ -108,6 +109,7 @@ public class PriceListManager {
 			for (RoomType roomType : roomTypes.keySet()) {
 				writer.write(String.valueOf(id) + "," + roomType.getType() + "," + String.valueOf(roomTypes.get(roomType)) + "\n");
 			}
+			writer.flush();
 		} catch (Exception e) {
 			System.out.println("Error writing to file");
 		}
@@ -119,11 +121,12 @@ public class PriceListManager {
 			FileWriter writer = new FileWriter(filePath + fileName);
 			for (PriceList priceList : priceLists.values()) {
 				this.writeServices(priceList.getId(), priceList.getServices());
-				this.writeRoomTypes(priceList.getId(), priceList.getRoomPrices());
-				writer.write(priceList.getStartDate() + "," + priceList.getEndDate() + "," + String.valueOf(priceList.getId()) + "," + String.valueOf(priceList.isDeleted()) + "\n");
+				this.writeRoomTypes(priceList.getId(), priceList.getRoomPrices());	
+				writer.write(String.valueOf(priceList.getId()) + "," + String.valueOf(priceList.getStartDate()) + "," + String.valueOf(priceList.getEndDate()) + "," + String.valueOf(priceList.isDeleted()) + "\n");
 			}
+			writer.flush();
 		} catch (Exception e) {
-			System.out.println("Error writing to file");
+			System.out.println("Error writing to file" + fileName);
 		}
 	}
 	

@@ -37,11 +37,12 @@ public class AddReservation extends JFrame implements ActionListener{
 	
 	JDatePickerImpl startDatePicker;
 	JDatePickerImpl endDatePicker;
-	JComboBox roomTypeCombobox;
+	JComboBox<String> roomTypeCombobox;
 	String username;
 	JButton buttonSubmit;
 	JLabel error;
 	ArrayList<Service> selectedServices;
+	ArrayList<String> selectedAdditionalServices;
 	
 	public boolean validateInput() {
 		error.setText("");
@@ -115,8 +116,6 @@ public class AddReservation extends JFrame implements ActionListener{
         startDatePanel.add(startDatePicker);
 	    this.add(startDatePanel);
 	    
-	    //TODO additional criteria
-	    
 		properties = new Properties();
         properties.put("text.today", "Today");
         properties.put("text.month", "Month");
@@ -164,13 +163,37 @@ public class AddReservation extends JFrame implements ActionListener{
 			comboBox[i] = type;
 			i++;
 		}
-		roomTypeCombobox = new JComboBox(comboBox);
+		roomTypeCombobox = new JComboBox<String>(comboBox);
 		if (data.size() != 0) {
 			roomTypeCombobox.setSelectedItem(data.get(4));
 		}
 		roomTypePanel.add(roomTypeCombobox);
 		this.add(roomTypePanel);
 		
+		JPanel additionalServicesPanel = new JPanel();
+		additionalServicesPanel.setBorder(javax.swing.BorderFactory.createTitledBorder("Additional Services"));
+		additionalServicesPanel.setLayout(new GridLayout(2, 3));
+		this.add(additionalServicesPanel);
+		selectedAdditionalServices = new ArrayList<String>();
+		for (String service : ManagerManager.getRoomManager().getAllAdditionalServices()) {
+			JCheckBox checkBox = new JCheckBox(service);
+			checkBox.setSelected(false);
+			additionalServicesPanel.add(checkBox);
+			checkBox.addActionListener(new ActionListener() {
+				@Override
+				public void actionPerformed(ActionEvent e) {
+					if (checkBox.isSelected()) {
+						selectedAdditionalServices.add(service);
+					} else {
+						selectedAdditionalServices.remove(service);
+					}
+					roomTypeCombobox.removeAllItems();
+					for (String type : ManagerManager.getRoomManager().findRoomTypes(selectedAdditionalServices)) {
+						roomTypeCombobox.addItem(type);
+					}
+				}
+			});
+		}
 		
 		JPanel servicesPanel = new JPanel();
 		servicesPanel.setBorder(javax.swing.BorderFactory.createTitledBorder("Services"));
@@ -215,7 +238,7 @@ public class AddReservation extends JFrame implements ActionListener{
         this.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         this.getContentPane().setBackground(new java.awt.Color(222, 224, 223));
         this.setLocationRelativeTo(null);
-        this.setLayout(new GridLayout(5, 1));
+        this.setLayout(new GridLayout(6, 1));
     }
 	
 	@Override
