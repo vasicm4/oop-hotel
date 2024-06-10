@@ -73,7 +73,7 @@ public class Reservation {
 				+ roomType + ", guest=" + guest + ", services=" + services + ", status=" + status + ", id=" + id + "]";
 	}
 	
-	public double getPrice(PriceListManager priceListManager, RoomType roomType) {
+	public double getPrice(PriceListManager priceListManager) {
 		double price = 0;
 		if (this.getStatus() == ReservationStatus.REJECTED) {
 			return 0;

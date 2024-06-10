@@ -157,7 +157,7 @@ ArrayList<Service> services, ReservationStatus status, boolean deleted) {
 		double totalEarnings = 0;
 		for (Reservation reservation : reservations.values()) {
 			if (reservation.getCheckIn().compareTo(startDate) >= 0 && reservation.getCheckOut().compareTo(endDate) <= 0) {
-				totalEarnings += reservation.getPrice(ManagerManager.getPriceListManager(), reservation.getRoomType());
+				totalEarnings += reservation.getPrice(ManagerManager.getPriceListManager());
 			}
 		}
 		return totalEarnings;
@@ -187,9 +187,9 @@ ArrayList<Service> services, ReservationStatus status, boolean deleted) {
 			if (reservation.getCheckIn().compareTo(startDate) >= 0
 					&& reservation.getCheckOut().compareTo(endDate) <= 0) {
 				if (roomsRevenue.containsKey(reservation.getRoom())) {
-					roomsRevenue.put(reservation.getRoom(), roomsRevenue.get(reservation.getRoom()) + reservation.getPrice(ManagerManager.getPriceListManager(), reservation.getRoomType()));
+					roomsRevenue.put(reservation.getRoom(), roomsRevenue.get(reservation.getRoom()) + reservation.getPrice(ManagerManager.getPriceListManager()));
 				} else {
-					roomsRevenue.put(reservation.getRoom(), reservation.getPrice(ManagerManager.getPriceListManager(), reservation.getRoomType()));
+					roomsRevenue.put(reservation.getRoom(), reservation.getPrice(ManagerManager.getPriceListManager()));
 				}
 			}
 		}
@@ -208,7 +208,7 @@ ArrayList<Service> services, ReservationStatus status, boolean deleted) {
 		double expenses = 0;
 		for (Reservation reservation : reservations.values()) {
 			if (reservation.getGuest().equals(guest)) {
-				expenses += reservation.getPrice(ManagerManager.getPriceListManager(), reservation.getRoomType());
+				expenses += reservation.getPrice(ManagerManager.getPriceListManager());
 			}
 		}
 		return expenses;

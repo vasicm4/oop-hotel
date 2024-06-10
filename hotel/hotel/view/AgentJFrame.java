@@ -17,7 +17,7 @@ import java.util.Properties;
 
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
-import javax.swing.JComboBox;
+import javax.swing.JFormattedTextField;
 import javax.swing.JFormattedTextField.AbstractFormatter;
 import javax.swing.JFrame;
 import javax.swing.JMenu;
@@ -42,6 +42,7 @@ import rooms.Reservation;
 import rooms.ReservationStatus;
 import rooms.Room;
 import rooms.RoomStatus;
+import rooms.RoomType;
 import users.Guest;
 
 public class AgentJFrame extends JFrame implements ActionListener{
@@ -55,10 +56,15 @@ public class AgentJFrame extends JFrame implements ActionListener{
 	
 	JPanel upperPanel;
 	ArrayList<Service> selectedServices;
+	ArrayList<RoomType> roomTypes;
+	ArrayList<Room> rooms;
+	HashMap<Double, Double> priceRange;
 	ArrayList<String> data;
 	JTable table;
 	String screen = "reservations";
 	String filter = "";
+	
+	
 	
 	public JPanel tableGuests() {
 		tablePanel = new JPanel();
@@ -97,9 +103,47 @@ public class AgentJFrame extends JFrame implements ActionListener{
 		
 		ReservationManager reservationManager = ManagerManager.reservationManager;
 		ArrayList<Reservation> reservations = reservationManager.getAvailableReservations();
-		String[][] data = new String[reservations.size()][8];
+		ArrayList<Reservation> reservationsCopy = new ArrayList<Reservation>();
+		reservationsCopy.addAll(reservations);
+		if (selectedServices.size() != 0 || roomTypes.size() != 0 || rooms.size() != 0 || priceRange.size() != 0) {
+			for (Reservation reservation : reservations) {
+				if (!reservation.getServices().containsAll(selectedServices) && selectedServices.size() != 0) {
+					reservationsCopy.remove(reservation);
+				}
+				if (!roomTypes.contains(reservation.getRoomType()) && roomTypes.size() != 0) {
+					reservationsCopy.remove(reservation);
+				}
+				if (!rooms.contains(reservation.getRoom()) && rooms.size() != 0) {
+					reservationsCopy.remove(reservation);
+				}
+				if (priceRange.size() != 0) {
+					boolean found = false;
+					for (Double key : priceRange.keySet()) {
+						if (reservation.getPrice(ManagerManager.getPriceListManager()) >= key && reservation.getPrice(ManagerManager.getPriceListManager()) <= priceRange.get(key)) {
+							found = true;
+							break;
+						}
+					}
+					if (!found) {
+						reservationsCopy.remove(reservation);
+					}
+				}
+			}
+		}
+		reservations = reservationsCopy;
+		for (int i = 0; i < reservations.size(); i++) {
+			for (int j = i + 1; j < reservations.size(); j++) {
+				if (reservations.get(i).getPrice(ManagerManager.getPriceListManager()) < reservations.get(j).getPrice(ManagerManager.getPriceListManager())) {
+					Reservation temp = reservations.get(i);
+					reservations.set(i, reservations.get(j));
+					reservations.set(j, temp);	
+				} else {
+					continue;
+				}
+			}
+		}
+        String[][] data = new String[reservations.size()][8];
 		int i = 0;
-		//TODO filtering
 		for (Reservation reservation : reservations) {
 			data[i][0] = reservation.getGuest().getUsername();
 			data[i][1] = reservation.getCheckIn().toString();
@@ -116,7 +160,7 @@ public class AgentJFrame extends JFrame implements ActionListener{
 			} else {
 				data[i][6] = "";
 			}
-			data[i][7] = String.valueOf(reservation.getPrice(ManagerManager.getPriceListManager(), reservation.getRoomType()));
+			data[i][7] = String.valueOf(reservation.getPrice(ManagerManager.getPriceListManager()));
 			i++;
 		}
 		table = new JTable(data, columnNames);
@@ -125,6 +169,8 @@ public class AgentJFrame extends JFrame implements ActionListener{
 		tablePanel.add(scrollPane);
 		return tablePanel;
 	}
+
+	
 	
 	public JPanel tableDailyOccupancy(LocalDate date) {
 		tablePanel = new JPanel();
@@ -152,7 +198,7 @@ public class AgentJFrame extends JFrame implements ActionListener{
 			} else {
 				data[i][6] = "";
 			}
-			data[i][7] = String.valueOf(reservation.getPrice(ManagerManager.getPriceListManager(), reservation.getRoomType()));
+			data[i][7] = String.valueOf(reservation.getPrice(ManagerManager.getPriceListManager()));
 			i++;
 		}
 		data[reservations.size()][0] = "Daily Occupancy";
@@ -197,6 +243,10 @@ public class AgentJFrame extends JFrame implements ActionListener{
 			tablePanel = tableGuests();
 		} else if (screen == "reservations") {
 			filter = "";
+			selectedServices = new ArrayList<Service>();
+			roomTypes = new ArrayList<RoomType>();
+			rooms = new ArrayList<Room>();
+			priceRange = new HashMap<Double, Double>();
 			tablePanel = tableReservations();
 		} else if (screen == "rooms") {
 			tablePanel = tableRooms();
@@ -471,24 +521,104 @@ public class AgentJFrame extends JFrame implements ActionListener{
 		upperPanel.add(buttonFilter);
 		buttonFilter.addActionListener(ActionEvent -> {
 			JFrame filterFrame = new JFrame();
-			JPanel filterPanel = new JPanel();
-			filterPanel.setBorder(javax.swing.BorderFactory.createTitledBorder("Filter"));
-			JComboBox<String> statusComboBox = new JComboBox<String>();
-			statusComboBox.addItem("Room Type");
-			statusComboBox.addItem("Room Number");
-			statusComboBox.addItem("Price");
-			statusComboBox.addItem("Service");
-			filterPanel.add(statusComboBox);
+			
+			JPanel roomTypePanel = new JPanel();
+			roomTypePanel.setBorder(javax.swing.BorderFactory.createTitledBorder("Room type"));
+			roomTypes = new ArrayList<RoomType>();
+			for (RoomType type : ManagerManager.getRoomTypeManager().getRoomTypes().values()) {
+				JCheckBox checkBox = new JCheckBox(type.getType());
+				roomTypePanel.add(checkBox);
+				checkBox.addActionListener(ActionEvent2 -> {
+					if (checkBox.isSelected()) {
+						roomTypes.add(type);
+					} else {
+						rooms.remove(type);
+					}				
+				});
+			}
+			
+			
+			JPanel roomPanel = new JPanel();
+			roomPanel.setBorder(javax.swing.BorderFactory.createTitledBorder("Room"));
+			rooms = new ArrayList<Room>();
+			for (Room room : ManagerManager.getRoomManager().getRooms().values()) {
+				JCheckBox checkBox = new JCheckBox(String.valueOf(room.getNumber()));
+				roomPanel.add(checkBox);
+				checkBox.addActionListener(ActionEvent2 -> {
+					if (checkBox.isSelected()) {
+						rooms.add(room);
+					} else {
+						rooms.remove(room);
+					}
+				});
+			}
+			
+			JPanel pricePanel = new JPanel();
+			pricePanel.setBorder(javax.swing.BorderFactory.createTitledBorder("Price"));
+		    priceRange = new HashMap<Double, Double>();
+		    JFormattedTextField priceFrom = new JFormattedTextField();
+		    priceFrom.setPreferredSize(new Dimension(100, 50));
+		    JFormattedTextField priceTo = new JFormattedTextField();
+		    priceTo.setPreferredSize(new Dimension(100, 50));
+		    pricePanel.add(priceFrom);
+		    pricePanel.add(priceTo);
+			
+			
+			JPanel servicesPanel = new JPanel();
+			servicesPanel.setBorder(javax.swing.BorderFactory.createTitledBorder("Services"));
+			selectedServices = new ArrayList<Service>();
+			for (Service service : ManagerManager.getServiceManager().getServices().values()) {
+				JCheckBox checkBox = new JCheckBox(service.getType());
+				servicesPanel.add(checkBox);
+				checkBox.addActionListener(ActionEvent2 -> {
+					if (checkBox.isSelected()) {
+						selectedServices.add(service);
+					} else {
+						selectedServices.remove(service);
+					}
+				});
+			}
+			
+			
 			JPanel buttonPanel = new JPanel();
 			JButton buttonSubmit = new JButton("Submit");
 			buttonSubmit.addActionListener(statusCombobox -> {
-				filter = statusComboBox.getSelectedItem().toString();
+				if (!priceFrom.getText().isEmpty() && priceTo.getText().isEmpty()) {
+					JOptionPane.showMessageDialog(null, "Please enter price range", "Failure", JOptionPane.ERROR_MESSAGE);
+					return;
+				} else if (priceFrom.getText().isEmpty() && !priceTo.getText().isEmpty()) {
+					JOptionPane.showMessageDialog(null, "Please enter price range", "Failure",
+							JOptionPane.ERROR_MESSAGE);
+					return;
+				} else if (!priceFrom.getText().isEmpty() && !priceTo.getText().isEmpty()) {
+					try {
+						priceRange.put(Double.parseDouble(priceFrom.getText()), Double.parseDouble(priceTo.getText()));
+						if (Double.parseDouble(priceFrom.getText()) > Double.parseDouble(priceTo.getText())) {
+							JOptionPane.showMessageDialog(null, "Please enter valid price range", "Failure", JOptionPane.ERROR_MESSAGE);
+							return;
+						}
+					} catch (Exception e) {
+						JOptionPane.showMessageDialog(null, "Please enter valid price range", "Failure", JOptionPane.ERROR_MESSAGE);
+						return;
+					}
+				}
+				filterFrame.dispose();
+				this.remove(tablePanel);
+				tablePanel = new JPanel();
+				this.tableReservations();
+				this.add(upperPanel, BorderLayout.NORTH);
+				this.add(tablePanel, BorderLayout.CENTER);
+				this.repaint();
+				this.setVisible(true);
 			});
 			buttonPanel.add(buttonSubmit);
-			filterFrame.add(filterPanel);
+			filterFrame.add(roomTypePanel);
+			filterFrame.add(roomPanel);
+			filterFrame.add(pricePanel);
+			filterFrame.add(servicesPanel);
 			filterFrame.add(buttonPanel);
-			filterFrame.setLayout(new GridLayout(2, 1));
-			filterFrame.setSize(200, 200);
+			filterFrame.setLayout(new GridLayout(5, 1));
+			filterFrame.setSize(500, 500);
 			filterFrame.setLocationRelativeTo(null);
 			filterFrame.setVisible(true);
 		});

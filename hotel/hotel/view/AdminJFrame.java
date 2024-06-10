@@ -561,7 +561,7 @@ public class AdminJFrame extends JFrame implements ActionListener{
 			} else {
 				data[i][6] = "";
 			}
-			data[i][7] = String.valueOf(reservation.getPrice(ManagerManager.getPriceListManager(), reservation.getRoomType()));
+			data[i][7] = String.valueOf(reservation.getPrice(ManagerManager.getPriceListManager()));
 			i++;
 		}
 		table = new JTable(data, columnNames);

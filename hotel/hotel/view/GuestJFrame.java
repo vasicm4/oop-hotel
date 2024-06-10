@@ -54,7 +54,7 @@ public class GuestJFrame extends JFrame implements ActionListener{
 			data[i][3] = reservation.getRoomType().toString();
 			data[i][4] = ReservationStatus.getStatus(reservation.getStatus());
 			data[i][5] = reservation.getServices().toString();
-			data[i][6] = String.valueOf(reservation.getPrice(ManagerManager.getPriceListManager(), reservation.getRoomType()));
+			data[i][6] = String.valueOf(reservation.getPrice(ManagerManager.getPriceListManager()));
 			i++;
 		}
 		data[reservations.size()][0] = "Total";
