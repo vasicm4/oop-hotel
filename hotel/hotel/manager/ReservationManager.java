@@ -183,16 +183,24 @@ ArrayList<Service> services, ReservationStatus status, boolean deleted) {
 	
 	public HashMap<Room,Double> getRoomsRevenue(LocalDate startDate, LocalDate endDate){
 		HashMap<Room, Double> roomsRevenue = new HashMap<Room, Double>();
+		boolean found = false;
 		for (Reservation reservation : reservations.values()) {
-			if (reservation.getCheckIn().compareTo(startDate) >= 0
-					&& reservation.getCheckOut().compareTo(endDate) <= 0) {
+			if (reservation.getCheckIn().compareTo(startDate) >= 0 && reservation.getCheckOut().compareTo(endDate) <= 0) {
 				if (roomsRevenue.containsKey(reservation.getRoom())) {
 					roomsRevenue.put(reservation.getRoom(), roomsRevenue.get(reservation.getRoom()) + reservation.getPrice(ManagerManager.getPriceListManager()));
+					found = true;
 				} else {
 					roomsRevenue.put(reservation.getRoom(), reservation.getPrice(ManagerManager.getPriceListManager()));
+					found = true;
 				}
 			}
 		}
+		for (Room room : ManagerManager.getRoomManager().getRooms().values()) {
+			if (!found) {
+				roomsRevenue.put(room, 0.0);
+			}
+		}
+		
 		return roomsRevenue;
 	}
 	

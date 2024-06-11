@@ -755,10 +755,31 @@ public class AdminJFrame extends JFrame implements ActionListener{
 		earningChart.setBounds(240,0, 150, 50);
 		upperPanel.add(earningChart);
 		earningChart.addActionListener(ActionEvent -> {
-			//TODO: implement chart 
 			JFrame chartFrame = new JFrame();
-			
-			
+			HashMap<String, ArrayList<Double>> data = new HashMap<String, ArrayList<Double>>();
+			for (RoomType roomType : ManagerManager.getRoomTypeManager().getAvailableRoomTypes().values()) {
+				data.put(roomType.getType(), new ArrayList<Double>());
+			}
+			ArrayList<Double> totalEarnings = new ArrayList<Double>();
+			for (int i = 12; i > 0; i--) {
+				LocalDate startDate = LocalDate.now().minusMonths(i).withDayOfMonth(1);
+                LocalDate endDate = LocalDate.now().minusMonths(i-1).withDayOfMonth(1);
+                HashMap<Room, Double> roomsRevenue = ManagerManager.reservationManager.getRoomsRevenue(startDate, endDate);
+                Double total = 0.0;
+                for (Room room : roomsRevenue.keySet()) {
+                	if (data.get(room.getType().getType()) != null) {
+                		data.get(room.getType().getType()).add(roomsRevenue.get(room));
+                		total += roomsRevenue.get(room);
+                	} else {
+                		data.get(room.getType().getType()).add(roomsRevenue.get(room));
+                		total += roomsRevenue.get(room);
+                	}
+            	}
+                totalEarnings.add(total);
+			}
+			data.put("Total Earnings", totalEarnings);
+			JPanel chartPanel = AreaChart.createAreaChart(data);
+			chartFrame.add(chartPanel);
 			chartFrame.setTitle("Earnings Chart");
 			chartFrame.setSize(800, 600);
 			chartFrame.setVisible(true);
