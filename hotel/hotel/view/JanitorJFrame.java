@@ -54,6 +54,7 @@ public class JanitorJFrame extends JFrame implements ActionListener{
 			i++;
 		}
 		table = new JTable(data, columnNames);
+		table.setDefaultEditor(Object.class, null);
 		JScrollPane scrollPane = new JScrollPane(table);
 		scrollPane.setPreferredSize(new Dimension(900, 800));
 		tablePanel.add(scrollPane);

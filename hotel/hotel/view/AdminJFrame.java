@@ -29,10 +29,13 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
+import javax.swing.SwingUtilities;
 
 import org.jdatepicker.impl.JDatePanelImpl;
 import org.jdatepicker.impl.JDatePickerImpl;
 import org.jdatepicker.impl.UtilDateModel;
+import org.knowm.xchart.PieChart;
+import org.knowm.xchart.SwingWrapper;
 
 import hotel.PriceList;
 import hotel.Service;
@@ -260,6 +263,7 @@ public class AdminJFrame extends JFrame implements ActionListener{
 				i++;
 			}
 			table = new JTable(data, columnNames);
+			table.setDefaultEditor(Object.class, null);
 			
 		} else if (type.equals("reservation")) {
 			ReservationManager reservationManager = ManagerManager.reservationManager;
@@ -288,6 +292,7 @@ public class AdminJFrame extends JFrame implements ActionListener{
 			data[3][0] = "Total Reservations";
 			data[3][1] = String.valueOf(accepted + rejected + cancelled);
 			table = new JTable(data, columnNames);
+			table.setDefaultEditor(Object.class, null);
 		
 		} else if (type.equals("room")) {
 			ReservationManager reservationManager = ManagerManager.reservationManager;
@@ -312,6 +317,7 @@ public class AdminJFrame extends JFrame implements ActionListener{
 				i++;
 			}
 			table = new JTable(data, columnNames);
+			table.setDefaultEditor(Object.class, null);
 			
 		}
 		
@@ -344,7 +350,8 @@ public class AdminJFrame extends JFrame implements ActionListener{
 				data[i][6] = String.valueOf(guest.getGender());
 				i++;
 			}
-			table = new JTable(data, columnNames);			
+			table = new JTable(data, columnNames);	
+			table.setDefaultEditor(Object.class, null);
 		} else if (currentScreen == "admins") {
 			ManagerManager.getInstance();
 			AdminManager adminManager = ManagerManager.adminManager;
@@ -366,6 +373,7 @@ public class AdminJFrame extends JFrame implements ActionListener{
 			}
 			
 			table = new JTable(data, columnNames);
+			table.setDefaultEditor(Object.class, null);
 			
 		} else if (currentScreen == "agents") {			
 			ManagerManager.getInstance();
@@ -388,6 +396,7 @@ public class AdminJFrame extends JFrame implements ActionListener{
 			}
 			
 			table = new JTable(data, columnNames);
+			table.setDefaultEditor(Object.class, null);
 			
 		} else if (currentScreen == "janitors") {			
 			ManagerManager.getInstance();
@@ -433,6 +442,7 @@ public class AdminJFrame extends JFrame implements ActionListener{
 			i++;
 		}
 		table = new JTable(data, columnNames);
+		table.setDefaultEditor(Object.class, null);
 		
 		JScrollPane scrollPane = new JScrollPane(table);
 		scrollPane.setPreferredSize(new Dimension(1000, 800));
@@ -456,6 +466,7 @@ public class AdminJFrame extends JFrame implements ActionListener{
 			i++;
 		}
 		table = new JTable(data, columnNames);
+		table.setDefaultEditor(Object.class, null);
 		
 		JScrollPane scrollPane = new JScrollPane(table);
 		scrollPane.setPreferredSize(new Dimension(1000, 800));
@@ -478,6 +489,7 @@ public class AdminJFrame extends JFrame implements ActionListener{
 			i++;
 		}
 		table = new JTable(data, columnNames);
+		table.setDefaultEditor(Object.class, null);
 		JScrollPane scrollPane = new JScrollPane(table);
 		scrollPane.setPreferredSize(new Dimension(900, 800));
 		tablePanel.add(scrollPane);
@@ -501,6 +513,7 @@ public class AdminJFrame extends JFrame implements ActionListener{
 		data[2][0] = "Profit";
 		data[2][1] = String.valueOf(Double.parseDouble(data[0][1]) - Double.parseDouble(data[1][1]));
 		table = new JTable(data, columnNames);
+		table.setDefaultEditor(Object.class, null);
 		JScrollPane scrollPane = new JScrollPane(table);
 		scrollPane.setPreferredSize(new Dimension(900, 800));
 		tablePanel.add(scrollPane);
@@ -529,6 +542,7 @@ public class AdminJFrame extends JFrame implements ActionListener{
 			}
 		}
 		table = new JTable(data, columnNames);
+		table.setDefaultEditor(Object.class, null);
 		JScrollPane scrollPane = new JScrollPane(table);
 		scrollPane.setPreferredSize(new Dimension(900, 800));
 		tablePanel.add(scrollPane);
@@ -565,6 +579,7 @@ public class AdminJFrame extends JFrame implements ActionListener{
 			i++;
 		}
 		table = new JTable(data, columnNames);
+		table.setDefaultEditor(Object.class, null);
 		JScrollPane scrollPane = new JScrollPane(table);
 		scrollPane.setPreferredSize(new Dimension(900, 800));
 		tablePanel.add(scrollPane);
@@ -741,6 +756,14 @@ public class AdminJFrame extends JFrame implements ActionListener{
 		upperPanel.add(earningChart);
 		earningChart.addActionListener(ActionEvent -> {
 			//TODO: implement chart 
+			JFrame chartFrame = new JFrame();
+			
+			
+			chartFrame.setTitle("Earnings Chart");
+			chartFrame.setSize(800, 600);
+			chartFrame.setVisible(true);
+			chartFrame.setResizable(false);
+			chartFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 		});
 
 		JButton monthlyEarnings = new JButton("Monthly Earnings");
@@ -1290,7 +1313,6 @@ public class AdminJFrame extends JFrame implements ActionListener{
 		buttonRefresh.setBounds(10,0, 100, 50);
 		upperPanel.add(buttonRefresh);
 		buttonRefresh.addActionListener(ActionEvent -> {
-			//TODO: implement refresh
 			this.repaint();
 		});
 		
@@ -1319,14 +1341,39 @@ public class AdminJFrame extends JFrame implements ActionListener{
 		janitorGraph.setBounds(600,0, 150, 50);
 		upperPanel.add(janitorGraph);
 		janitorGraph.addActionListener(ActionEvent -> {
-			//TODO: implement janitor graph
+			JFrame janitorGraphFrame = new JFrame();
+			HashMap<String, Integer> janitorCleanedRooms = ManagerManager.getCleaningManager().getCleanedRoomsCount(LocalDate.now().minusMonths(1), LocalDate.now());
+			JPanel chartPanel = CustomPieChart.createPieChart(janitorCleanedRooms);
+			janitorGraphFrame.add(chartPanel);
+			janitorGraphFrame.setLayout(new GridLayout(1, 1));
+			janitorGraphFrame.setSize(400, 400);
+			janitorGraphFrame.setLocationRelativeTo(null);
+			janitorGraphFrame.setVisible(true);
+			janitorGraphFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 		});
 		
 		JButton reservationGraph = new JButton("Reservation Graph");
 		reservationGraph.setBounds(760,0, 150, 50);
 		upperPanel.add(reservationGraph);
 		reservationGraph.addActionListener(ActionEvent -> {
-			//TODO: implement reservation graph
+			JFrame reservationGraphFrame = new JFrame();
+			ArrayList<Reservation> reservations = ManagerManager.reservationManager.findReservations(LocalDate.now(), LocalDate.now().plusMonths(1));
+			HashMap<String, Integer> reservationCount = new HashMap<String, Integer>();
+			for (Reservation reservation : reservations) {
+				if (reservationCount.containsKey(reservation.getStatus().toString())) {
+					reservationCount.put(reservation.getStatus().toString(), reservationCount.get(reservation.getStatus().toString()) + 1);
+				} else {
+					reservationCount.put(reservation.getStatus().toString(), 1);
+				}
+			}
+			JPanel chartPanel = CustomPieChart.createPieChart(reservationCount);
+			reservationGraphFrame.add(chartPanel);
+			reservationGraphFrame.setLayout(new GridLayout(1, 1));
+			reservationGraphFrame.setSize(400, 400);
+			reservationGraphFrame.setLocationRelativeTo(null);
+			reservationGraphFrame.setVisible(true);
+			reservationGraphFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+			
 		});
 		
 		JButton logoutButton = new JButton("Logout");

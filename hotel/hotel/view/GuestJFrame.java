@@ -59,8 +59,8 @@ public class GuestJFrame extends JFrame implements ActionListener{
 		}
 		data[reservations.size()][0] = "Total";
 		data[reservations.size()][6] = String.valueOf(reservationManager.allReservationsExpenses(ManagerManager.getGuestManager().find(username)));
-		
 		table = new JTable(data, columnNames);
+		table.setDefaultEditor(Object.class, null);
 		JScrollPane scrollPane = new JScrollPane(table);
 		scrollPane.setPreferredSize(new Dimension(900, 800));
 		tablePanel.add(scrollPane);

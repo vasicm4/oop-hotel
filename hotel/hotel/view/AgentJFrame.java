@@ -89,6 +89,7 @@ public class AgentJFrame extends JFrame implements ActionListener{
 			i++;
 		}
 		table = new JTable(data, columnNames);	
+		table.setDefaultEditor(Object.class, null);
 		JScrollPane scrollPane = new JScrollPane(table);
 		scrollPane.setPreferredSize(new Dimension(900, 800));
 		tablePanel.add(scrollPane);
@@ -164,6 +165,7 @@ public class AgentJFrame extends JFrame implements ActionListener{
 			i++;
 		}
 		table = new JTable(data, columnNames);
+		table.setDefaultEditor(Object.class, null);
 		JScrollPane scrollPane = new JScrollPane(table);
 		scrollPane.setPreferredSize(new Dimension(900, 800));
 		tablePanel.add(scrollPane);
@@ -205,6 +207,7 @@ public class AgentJFrame extends JFrame implements ActionListener{
 		data[reservations.size()][7] = String.valueOf(reservationManager.getOccupiedRooms(date));
 		
 		table = new JTable(data, columnNames);
+		table.setDefaultEditor(Object.class, null);
 		JScrollPane scrollPane = new JScrollPane(table);
 		scrollPane.setPreferredSize(new Dimension(900, 800));
 		tablePanel.add(scrollPane);
@@ -228,7 +231,7 @@ public class AgentJFrame extends JFrame implements ActionListener{
 			i++;
 		}
 		table = new JTable(data, columnNames);
-		
+		table.setDefaultEditor(Object.class, null);
 		JScrollPane scrollPane = new JScrollPane(table);
 		scrollPane.setPreferredSize(new Dimension(1000, 800));
 		tablePanel.add(scrollPane);
