@@ -35,7 +35,7 @@ public class AddGuest extends JFrame implements ActionListener{
 	JTextField surnameField;
 	JPasswordField passwordField;
 	JSpinner phone;
-	JComboBox<Gender> gender;
+	JComboBox<String> gender;
 	JDatePickerImpl datePicker;
 	JLabel error;
 	JFrame AddGuest = this;
@@ -201,11 +201,10 @@ public class AddGuest extends JFrame implements ActionListener{
 	    
 	    JPanel genderPanel = new JPanel();
 	    genderPanel.setBorder(javax.swing.BorderFactory.createTitledBorder("Gender"));
-	    String[] genders = {"MALE", "FEMALE"};
-	    gender = new JComboBox(genders);
-		if (data.size() != 0) {
-			gender.setSelectedItem(data.get(6));
-		}
+	    
+	    gender = new JComboBox<String>();
+	    gender.addItem("MALE");
+	    gender.addItem("FEMALE");
 	    genderPanel.add(gender);
 	    addEmployeeFrame.add(genderPanel);
 	 
@@ -228,8 +227,8 @@ public class AddGuest extends JFrame implements ActionListener{
 			}
 	    	valid = validateGuest(valid);
 	    	if (valid) {
-	    		guestManager.add(usernameField.getText(), String.valueOf(passwordField.getPassword()), nameField.getText(), surnameField.getText(), LocalDate.parse(datePicker.getJFormattedTextField().getText()), Integer.parseInt(phone.getValue().toString()), Gender.getGender(gender.getSelectedItem().toString()));
-	    		AddGuest.dispose();
+	    		guestManager.add(usernameField.getText(), String.valueOf(passwordField.getPassword()), nameField.getText(), surnameField.getText(), LocalDate.parse(datePicker.getJFormattedTextField().getText()), Integer.parseInt(phone.getValue().toString()), Gender.getGender(String.valueOf(gender.getSelectedItem())));
+	    		addEmployeeFrame.dispose();
 	    	}
 	    });
 }

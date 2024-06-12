@@ -29,13 +29,10 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
-import javax.swing.SwingUtilities;
 
 import org.jdatepicker.impl.JDatePanelImpl;
 import org.jdatepicker.impl.JDatePickerImpl;
 import org.jdatepicker.impl.UtilDateModel;
-import org.knowm.xchart.PieChart;
-import org.knowm.xchart.SwingWrapper;
 
 import hotel.PriceList;
 import hotel.Service;
@@ -74,6 +71,7 @@ public class AdminJFrame extends JFrame implements ActionListener{
 	JMenuItem roomListItem;
 	JMenuItem reservationListItem;
 	JMenuItem roomTypeListItem;
+	JMenuItem servicesItem;
 	
 	String currentScreen = "admins";
 	JPanel upperPanel;
@@ -496,6 +494,27 @@ public class AdminJFrame extends JFrame implements ActionListener{
 		return tablePanel;
 	}
 	
+	public JPanel tableServices() {
+		tablePanel = new JPanel();
+		table = new JTable();
+		table.setDefaultEditor(Object.class, null);		
+		HashMap<String, Service> services = ManagerManager.getServiceManager().getActiveServices();
+		String[] columnNames = {"Type"};	
+		String[][] data = new String[services.keySet().size()][1];
+		int i = 0;
+		for (String service: services.keySet()) {
+			data[i][0] = service;
+			i++;
+		}
+		table = new JTable(data, columnNames);
+		table.setDefaultEditor(Object.class, null);
+		JScrollPane scrollPane = new JScrollPane(table);
+		scrollPane.setPreferredSize(new Dimension(900, 800));
+		tablePanel.add(scrollPane);
+		return tablePanel;
+		
+	}
+	
 	public JPanel tableEarnings(LocalDate startDate, LocalDate endDate) {
 		tablePanel = new JPanel();
 		table = new JTable();
@@ -743,12 +762,14 @@ public class AdminJFrame extends JFrame implements ActionListener{
 		buttonRefresh.setBounds(10,0, 100, 50);
 		upperPanel.add(buttonRefresh);
 		buttonRefresh.addActionListener(ActionEvent -> {
-			this.remove(tablePanel);
+			if (tablePanel != null) {
+				this.remove(tablePanel);
+			}
 			tablePanel = new JPanel();
-//			this.table();
+			this.tableEarnings(LocalDate.now().minusMonths(1).withDayOfMonth(1), LocalDate.now().withDayOfMonth(1));
 			this.add(tablePanel, BorderLayout.CENTER);
-			this.repaint();
-			this.setVisible(true);
+	        this.repaint();
+	        this.setVisible(true);
 		});
 		
 		JButton earningChart = new JButton("Earning Chart");
@@ -1242,13 +1263,6 @@ public class AdminJFrame extends JFrame implements ActionListener{
 			this.setVisible(true);
 		});
 		
-//		JButton addCleaningList = new JButton("Add new");
-//		addCleaningList.setBounds(120,0, 100, 50);
-//		addCleaningList.addActionListener(ActionEvent -> {
-//			//TODO implement add cleaning list
-//		});
-//		upperPanel.add(addCleaningList);
-		
 		JButton editCleaningList = new JButton("Edit");
 		editCleaningList.setBounds(230,0, 100, 50);
 		upperPanel.add(editCleaningList);
@@ -1257,7 +1271,6 @@ public class AdminJFrame extends JFrame implements ActionListener{
                 int row = table.getSelectedRow();
                 String janitorMain = String.valueOf(table.getValueAt(row, 0));
                 Room room = ManagerManager.getRoomManager().find(Integer.parseInt(String.valueOf(table.getValueAt(row, 1))));
-                ArrayList<Room> rooms = ManagerManager.getCleaningManager().getRoomsToBeCleaned().get(janitorMain);
 				JFrame changeCleaningListFrame = new JFrame();
 				JPanel janitors = new JPanel();
 				janitors.setBorder(javax.swing.BorderFactory.createTitledBorder("Janitors"));
@@ -1309,12 +1322,16 @@ public class AdminJFrame extends JFrame implements ActionListener{
 		deleteRoom.setBounds(850, 0, 100, 50);
 		upperPanel.add(deleteRoom);
 		deleteRoom.addActionListener(ActionEvent -> {
-			int reply = JOptionPane.showConfirmDialog(null, "Are you sure you want to delete this room?");
-			if (reply == JOptionPane.YES_OPTION) {		
-				int row = table.getSelectedRow();
+			try {
+                int row = table.getSelectedRow();
 				String roomNumber = String.valueOf(table.getValueAt(row, 0));
-				Room room = ManagerManager.getRoomManager().find(Integer.parseInt(roomNumber));
-				room.delete();
+				int reply = JOptionPane.showConfirmDialog(null, "Are you sure you want to delete this room?");
+				if (reply == JOptionPane.YES_OPTION) {		
+					Room room = ManagerManager.getRoomManager().find(Integer.parseInt(roomNumber));
+					room.delete();
+				}
+			} catch (Exception e) {
+				JOptionPane.showMessageDialog(null, "Please select a row to edit");
 			}
 		});
 
@@ -1334,7 +1351,7 @@ public class AdminJFrame extends JFrame implements ActionListener{
 		buttonRefresh.setBounds(10,0, 100, 50);
 		upperPanel.add(buttonRefresh);
 		buttonRefresh.addActionListener(ActionEvent -> {
-			this.repaint();
+			this.repaint();			
 		});
 		
 		JButton janitorStats = new JButton("Janitor Statistics");
@@ -1409,6 +1426,47 @@ public class AdminJFrame extends JFrame implements ActionListener{
 
 	}
 	
+	public void servicesPage() {
+		JButton buttonRefresh = new JButton("Refresh");
+		buttonRefresh.setBounds(10,0, 100, 50);
+		upperPanel.add(buttonRefresh);
+		buttonRefresh.addActionListener(ActionEvent -> {
+			this.remove(tablePanel);
+			tablePanel = new JPanel();
+			this.tableServices();
+			this.add(tablePanel, BorderLayout.CENTER);
+			this.repaint();
+			this.setVisible(true);
+		});
+		
+		JButton deleteService = new JButton("Delete");
+		deleteService.setBounds(850, 0, 100, 50);
+		upperPanel.add(deleteService);
+		deleteService.addActionListener(ActionEvent -> {
+			try {
+				int row = table.getSelectedRow();
+				String serviceString = String.valueOf(table.getValueAt(row, 0));
+				int reply = JOptionPane.showConfirmDialog(null, "Are you sure you want to delete this service?");
+				if (reply == JOptionPane.YES_OPTION) {		
+					Service service = ManagerManager.getServiceManager().find(serviceString);
+					service.delete();
+				}
+			} catch (Exception e){
+				JOptionPane.showMessageDialog(null, "Please select a row to edit");
+			}
+		}); 
+
+		JButton logoutButton = new JButton("Logout");
+		logoutButton.setBounds(960,0, 100, 50);
+		logoutButton.addActionListener(ActionEvent -> {
+            this.dispose();
+            new LoginJFrame(managerManager);
+        });
+		upperPanel.add(logoutButton);
+		
+		updateTablePanel();
+	}
+	
 	public AdminJFrame(ManagerManager managerManager) {
 		
 		this.managerManager = managerManager;
@@ -1468,6 +1526,10 @@ public class AdminJFrame extends JFrame implements ActionListener{
 		roomTypeListItem.addActionListener(this);
 		hotelMenu.add(roomTypeListItem);
 		
+		servicesItem = new JMenuItem("Services");
+		servicesItem.addActionListener(this);
+		hotelMenu.add(servicesItem);
+		
 		menuBar.add(hotelMenu);
 		
 		upperPanel = new JPanel();
@@ -1525,6 +1587,8 @@ public class AdminJFrame extends JFrame implements ActionListener{
             tablePanel = this.tableReservations();
 		} else if (currentScreen == "roomTypes") {
 			tablePanel = this.tableRoomTypes();
+		} else if (currentScreen == "services") {
+			tablePanel = this.tableServices();
 		} else {
 			tablePanel = this.tableUser();
 		}
@@ -1557,6 +1621,8 @@ public class AdminJFrame extends JFrame implements ActionListener{
 			this.roomTypePage();
 		} else if (currentScreen == "statistics") {
 			this.statisticsPage();
+		} else if (currentScreen == "services") {
+			this.servicesPage();
 		}
 	}
 	
@@ -1584,6 +1650,8 @@ public class AdminJFrame extends JFrame implements ActionListener{
 			currentScreen = "roomTypes";
 		} else if (e.getSource() == statisticsItem) {
 			currentScreen = "statistics";
+		} else if (e.getSource() == servicesItem) {
+			currentScreen = "services";
 		}
 		
 		this.screenManager();

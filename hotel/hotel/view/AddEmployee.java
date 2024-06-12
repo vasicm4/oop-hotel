@@ -37,7 +37,7 @@ public class AddEmployee extends JFrame{
 	JTextField surnameField;
 	JPasswordField passwordField;
 	JSpinner phone;
-	JComboBox<Gender> gender;
+	JComboBox<String> gender;
 	JComboBox<Education> education;
 	JSpinner experience;
 	JSpinner salary;
@@ -237,11 +237,9 @@ public class AddEmployee extends JFrame{
 	    
 	    JPanel genderPanel = new JPanel();
 	    genderPanel.setBorder(javax.swing.BorderFactory.createTitledBorder("Gender"));
-	    String[] genders = {"MALE", "FEMALE"};
-	    gender = new JComboBox(genders);
-		if (data.size() != 0) {
-			gender.setSelectedItem(data.get(6));
-		}
+	    gender = new JComboBox<String>();
+	    gender.addItem("MALE");
+	    gender.addItem("FEMALE");
 	    genderPanel.add(gender);
 	    this.add(genderPanel);
 	    
@@ -291,7 +289,7 @@ public class AddEmployee extends JFrame{
         		AdminManager adminManager = AdminManager.getInstance();
         		if (validateUsername(adminManager) || data.size() != 0) {
         			if (validateEmployee(true)) {
-        				adminManager.add(usernameField.getText(), String.valueOf(passwordField.getPassword()), nameField.getText(), surnameField.getText(), LocalDate.parse(datePicker.getJFormattedTextField().getText()), Integer.parseInt(phone.getValue().toString()), Gender.getGender(gender.getSelectedItem().toString()), Education.getEducation(education.getSelectedItem().toString()), Integer.parseInt(experience.getValue().toString()), Double.parseDouble(salary.getValue().toString()));  
+        				adminManager.add(usernameField.getText(), String.valueOf(passwordField.getPassword()), nameField.getText(), surnameField.getText(), LocalDate.parse(datePicker.getJFormattedTextField().getText()), Integer.parseInt(phone.getValue().toString()), Gender.getGender(String.valueOf(gender.getSelectedItem())), Education.getEducation(education.getSelectedItem().toString()), Integer.parseInt(experience.getValue().toString()), Double.parseDouble(salary.getValue().toString()));  
         				this.dispose();
         			}
         		}
@@ -299,7 +297,7 @@ public class AddEmployee extends JFrame{
 	    		AgentManager agentManager = AgentManager.getInstance();
 	    		if (validateUsername(agentManager) || data.size() != 0) {
 	    			if (validateEmployee(true)) {
-	    				agentManager.add(usernameField.getText(), String.valueOf(passwordField.getPassword()), nameField.getText(), surnameField.getText(), LocalDate.parse(datePicker.getJFormattedTextField().getText()), Integer.parseInt(phone.getValue().toString()), Gender.getGender(gender.getSelectedItem().toString()), Education.getEducation(education.getSelectedItem().toString()), Integer.parseInt(experience.getValue().toString()), Double.parseDouble(salary.getValue().toString()));  
+	    				agentManager.add(usernameField.getText(), String.valueOf(passwordField.getPassword()), nameField.getText(), surnameField.getText(), LocalDate.parse(datePicker.getJFormattedTextField().getText()), Integer.parseInt(phone.getValue().toString()), Gender.getGender(String.valueOf(gender.getSelectedItem())), Education.getEducation(education.getSelectedItem().toString()), Integer.parseInt(experience.getValue().toString()), Double.parseDouble(salary.getValue().toString()));  
 	    				this.dispose();
 	    			}
 	    		}
@@ -307,7 +305,7 @@ public class AddEmployee extends JFrame{
 	    		JanitorManager janitorManager = JanitorManager.getInstance();
         		if (validateUsername(janitorManager)) {
         			if (validateEmployee(true) || data.size() != 0) {
-        				janitorManager.add(usernameField.getText(), String.valueOf(passwordField.getPassword()), nameField.getText(), surnameField.getText(), LocalDate.parse(datePicker.getJFormattedTextField().getText()), Integer.parseInt(phone.getValue().toString()), Gender.getGender(gender.getSelectedItem().toString()), Education.getEducation(education.getSelectedItem().toString()), Integer.parseInt(experience.getValue().toString()), Double.parseDouble(salary.getValue().toString()));  
+        				janitorManager.add(usernameField.getText(), String.valueOf(passwordField.getPassword()), nameField.getText(), surnameField.getText(), LocalDate.parse(datePicker.getJFormattedTextField().getText()), Integer.parseInt(phone.getValue().toString()), Gender.getGender(String.valueOf(gender.getSelectedItem())), Education.getEducation(education.getSelectedItem().toString()), Integer.parseInt(experience.getValue().toString()), Double.parseDouble(salary.getValue().toString()));  
         				this.dispose();
         			}
         		}
