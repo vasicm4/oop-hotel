@@ -597,8 +597,10 @@ public class AdminJFrame extends JFrame implements ActionListener{
 		table = new JTable(data, columnNames);
 		table.setDefaultEditor(Object.class, null);
 		JScrollPane scrollPane = new JScrollPane(table);
-		scrollPane.setPreferredSize(new Dimension(900, 800));
-		tablePanel.add(scrollPane);
+		scrollPane.setVisible(true);
+		add(scrollPane);
+		tablePanel.setLayout(new BorderLayout());
+		tablePanel.add(scrollPane, BorderLayout.CENTER);
 		return tablePanel;
 	}
 	
@@ -823,7 +825,7 @@ public class AdminJFrame extends JFrame implements ActionListener{
 				}
 			}
 			JComboBox<String> year = new JComboBox<String>();
-			for (int i = 2024; i <= 2025; i++) {
+			for (int i = 2023; i <= 2025; i++) {
 				year.addItem(String.valueOf(i));
 			}
 			date.add(month);
@@ -1392,7 +1394,7 @@ public class AdminJFrame extends JFrame implements ActionListener{
 		upperPanel.add(reservationGraph);
 		reservationGraph.addActionListener(ActionEvent -> {
 			JFrame reservationGraphFrame = new JFrame();
-			ArrayList<Reservation> reservations = ManagerManager.reservationManager.findReservations(LocalDate.now(), LocalDate.now().plusMonths(1));
+			ArrayList<Reservation> reservations = ManagerManager.reservationManager.findReservations(LocalDate.now().minusMonths(1), LocalDate.now());
 			HashMap<String, Integer> reservationCount = new HashMap<String, Integer>();
 			for (Reservation reservation : reservations) {
 				if (reservationCount.containsKey(reservation.getStatus().toString())) {

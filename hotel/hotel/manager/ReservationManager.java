@@ -108,7 +108,6 @@ public class ReservationManager {
 			}
 		}
 		for (Room room : ManagerManager.getRoomManager().getRooms().values()) {
-			System.out.println(room);
 			if (roomCount.get(room) == null) {
 				roomCount.put(room, 0);
 			}
@@ -173,26 +172,27 @@ public class ReservationManager {
 	}
 	
 	public HashMap<Room,Double> getRoomsRevenue(LocalDate startDate, LocalDate endDate){
-		HashMap<Room, Double> roomsRevenue = new HashMap<Room, Double>();
+		HashMap<Room, Double> roomsRevenue = new HashMap<>();
 		boolean found = false;
+
+		// Populate roomsRevenue with rooms having reservations in the specified date range
 		for (Reservation reservation : reservations.values()) {
-			if (reservation.getCheckIn().compareTo(startDate) >= 0 && reservation.getCheckOut().compareTo(endDate) <= 0) {
-				if (roomsRevenue.containsKey(reservation.getRoom())) {
-					roomsRevenue.put(reservation.getRoom(), roomsRevenue.get(reservation.getRoom()) + reservation.getPrice(ManagerManager.getPriceListManager()));
-					found = true;
-				} else {
-					roomsRevenue.put(reservation.getRoom(), reservation.getPrice(ManagerManager.getPriceListManager()));
-					found = true;
-				}
-			}
+		    if (reservation.getCheckIn().compareTo(startDate) >= 0 && reservation.getCheckOut().compareTo(endDate) <= 0 && !reservation.isDeleted() && reservation.getStatus() == ReservationStatus.CHECKED_OUT) {
+		        Room room = reservation.getRoom();
+		        double revenue = reservation.getPrice(ManagerManager.getPriceListManager());
+		        roomsRevenue.put(room, roomsRevenue.getOrDefault(room, 0.0) + revenue);
+		        found = true;
+		    }
 		}
+
+		// Populate roomsRevenue with rooms having no reservations in the specified date range
 		for (Room room : ManagerManager.getRoomManager().getRooms().values()) {
-			if (!found) {
-				roomsRevenue.put(room, 0.0);
-			}
+		    if (!roomsRevenue.containsKey(room)) {
+		        roomsRevenue.put(room, 0.0);
+		    }
 		}
-		
 		return roomsRevenue;
+
 	}
 	
 	public void cancelExpiredReservations() {
@@ -272,6 +272,9 @@ public class ReservationManager {
 			String line;
 			while ((line = reader.readLine()) != null) {
 				String[] data = line.split(",");
+				for (int i = 0; i < data.length; i++) {
+					data[i] = data[i].trim();
+				}
 				ArrayList<Service> services = readServices(serviceManager, data[6]);
 				if (data[2].equals("null")){
 					this.add(LocalDate.parse(data[0]), LocalDate.parse(data[1]), null, roomTypeManager.getRoomType(data[3]),guestManager.find(data[4]), services, ReservationStatus.getStatus(data[5]), data[6],Boolean.parseBoolean(data[7]));

@@ -141,6 +141,9 @@ public class CleaningManager {
 			this.readRoomsToBeCleaned(roomManager);
 			while ((line = reader.readLine()) != null) {
 				String[] data = line.split(",");
+				for (int i = 0; i < data.length; i++) {
+					data[i] = data[i].trim();
+				}
 				String janitor = data[0];
 				String date = data[1];
 				int roomNumber = Integer.parseInt(data[2]);
