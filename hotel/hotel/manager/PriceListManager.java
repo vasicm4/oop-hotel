@@ -92,11 +92,14 @@ public class PriceListManager {
 		}
 	}
 	
-	public void writeServices(int id, HashMap<Service, Double> services) {
+	public void writeServices() {
         try {
             FileWriter writer = new FileWriter(filePath + "serviceServicePrice.csv");
-            for (Service service : services.keySet()) {
-                writer.write(String.valueOf(id) + "," + service.getType() + "," + String.valueOf(services.get(service)) + "\n");
+            for (PriceList priceList: priceLists.values()) {
+            	for (Service service: priceList.getServices().keySet()) {
+                    writer.write(String.valueOf(priceList.getId()) + "," + service.getType() + "," + String.valueOf(priceList.getServices().get(service)) + "\n");
+
+            	}
             }
             writer.flush();
         } catch (Exception e) {
@@ -104,12 +107,14 @@ public class PriceListManager {
         }
     }
 	
-	public void writeRoomTypes(int id, HashMap<RoomType, Double> roomTypes) {
+	public void writeRoomTypes() {
 		try {
 			FileWriter writer = new FileWriter(filePath + fileRoomTypes);
-			for (RoomType roomType : roomTypes.keySet()) {
-				writer.write(String.valueOf(id) + "," + roomType.getType() + "," + String.valueOf(roomTypes.get(roomType)) + "\n");
-			}
+			for (PriceList priceList : priceLists.values()) {
+				for (RoomType roomType: priceList.getRoomPrices().keySet()) {
+					writer.write(String.valueOf(priceList.getId()) + "," + roomType.getType() + "," + String.valueOf(priceList.getRoomPrices().get(roomType)) + "\n");
+				}
+			}			
 			writer.flush();
 		} catch (Exception e) {
 			System.out.println("Error writing to file");
@@ -118,11 +123,10 @@ public class PriceListManager {
 	
 	public void writeData() {
 		try {
-
+			this.writeRoomTypes();
+			this.writeServices();
 			FileWriter writer = new FileWriter(filePath + fileName);
 			for (PriceList priceList : priceLists.values()) {
-				this.writeServices(priceList.getId(), priceList.getServices());
-				this.writeRoomTypes(priceList.getId(), priceList.getRoomPrices());	
 				writer.write(String.valueOf(priceList.getId()) + "," + String.valueOf(priceList.getStartDate()) + "," + String.valueOf(priceList.getEndDate()) + "," + String.valueOf(priceList.isDeleted()) + "\n");
 			}
 			writer.flush();

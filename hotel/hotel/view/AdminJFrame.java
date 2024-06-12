@@ -122,10 +122,7 @@ public class AdminJFrame extends JFrame implements ActionListener{
 		if (startDatePicker.getModel().getValue() == null) {
 			valid =  false;
 			error.setText("Please enter a start date");
-		} else if (LocalDate.now().isAfter(LocalDate.parse(startDatePicker.getJFormattedTextField().getText()))) {
-			valid =  false;
-			error.setText("Please enter a valid start date");
-		} 
+		}
 		
 		if (endDatePicker.getModel().getValue() == null) {
 			error.setText("Please enter a end date");
