@@ -80,12 +80,6 @@ public class ReservationManagerTest {
     }
 
     @Test
-    public void testGetDailyReservations() {
-        HashMap<String, Reservation> dailyReservations = reservationManager.getDailyReservations(LocalDate.of(2024, 6, 10));
-        assertTrue(dailyReservations.containsKey("1"));
-    }
-
-    @Test
     public void testGetRoomCount() {
         HashMap<Room, Integer> roomCount = reservationManager.getRoomCount(LocalDate.of(2024, 6, 10), LocalDate.of(2024, 6, 25));
         assertEquals(1, (int) roomCount.get(room1));

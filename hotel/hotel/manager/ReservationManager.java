@@ -87,8 +87,8 @@ public class ReservationManager {
 	public HashMap<String, Reservation> getDailyReservations(LocalDate date) {
 		HashMap<String, Reservation> reservationsFound = new HashMap<String, Reservation>();
 		for (Reservation reservation : reservations.values()) {
-			if (reservation.getStatus() == ReservationStatus.CHECKED_IN || reservation.getStatus() == ReservationStatus.CHECKED_OUT || reservation.getStatus() == ReservationStatus.ACCEPTED) {
-				if (reservation.getCheckIn().compareTo(date) == 0 || reservation.getCheckOut().compareTo(date) == 0) {
+			if (reservation.getCheckIn().isBefore(date) && reservation.getCheckOut().isAfter(date)) {
+				if (!reservation.isDeleted() && reservation.getStatus() != ReservationStatus.CANCELLED && reservation.getStatus() != ReservationStatus.REJECTED) {
 					reservationsFound.put(reservation.getId(), reservation);
 				}
 			}
@@ -256,7 +256,7 @@ public class ReservationManager {
 			while ((line = reader.readLine()) != null) {
                 String[] data = line.split(",");
 				if (data[0].equals(id)) {
-					services.add(serviceManager.find(data[1]));
+					services.add(serviceManager.find(data[1].trim()));
 				}
             }	
             return services;

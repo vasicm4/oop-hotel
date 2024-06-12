@@ -50,6 +50,12 @@ public class AddReservation extends JFrame implements ActionListener{
 		if (startDatePicker.getModel().getValue() == null) {
 			valid =  false;
 			error.setText("Please enter a start date");
+		} else if (LocalDate.parse(startDatePicker.getJFormattedTextField().getText()).isBefore(LocalDate.now())) {
+			error.setText("Please enter a valid start date");
+			valid = false;
+		} else if (LocalDate.parse(startDatePicker.getJFormattedTextField().getText()).equals(LocalDate.now())) {
+			error.setText("Please enter a valid start date");
+			valid = false;
 		}
 		
 		if (endDatePicker.getModel().getValue() == null) {
@@ -223,7 +229,8 @@ public class AddReservation extends JFrame implements ActionListener{
 	    buttonPanel.setLayout(new GridLayout(2, 1));
 	    error = new JLabel("");
 	    error.setForeground(new java.awt.Color(255, 0, 0));
-	    error.setFont(new java.awt.Font("Tahoma", 1, 12));
+	    error.setFont(new java.awt.Font("Tahoma", 1, 20));
+	    error.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
 	    buttonPanel.add(error);
 	    
 	    this.add(buttonPanel);

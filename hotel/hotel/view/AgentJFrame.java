@@ -168,7 +168,10 @@ public class AgentJFrame extends JFrame implements ActionListener{
 		table.setDefaultEditor(Object.class, null);
 		JScrollPane scrollPane = new JScrollPane(table);
 		scrollPane.setPreferredSize(new Dimension(900, 800));
-		tablePanel.add(scrollPane);
+		scrollPane.setVisible(true);
+		add(scrollPane);
+		tablePanel.setLayout(new BorderLayout());
+		tablePanel.add(scrollPane, BorderLayout.CENTER);
 		return tablePanel;
 	}
 
@@ -371,6 +374,10 @@ public class AgentJFrame extends JFrame implements ActionListener{
 					JOptionPane.showMessageDialog(null, "This reservation is already checked in", "Failure",
 							JOptionPane.ERROR_MESSAGE);
 					return;
+				} else if (reservation.getStatus() == ReservationStatus.CHECKED_OUT) {
+					JOptionPane.showMessageDialog(null, "This reservation is checked out", "Failure",
+							JOptionPane.ERROR_MESSAGE);
+					return;
 				}
 				ReservationManager reservationManager = ManagerManager.reservationManager;
 				Room room = reservationManager.roomAvailable(ManagerManager.roomManager.getRooms(), reservation.getCheckIn(), reservation.getCheckOut(), reservation.getRoomType());
@@ -405,6 +412,14 @@ public class AgentJFrame extends JFrame implements ActionListener{
 					return;
 				} else if (reservation.getStatus() == ReservationStatus.CANCELLED) {
 					JOptionPane.showMessageDialog(null, "This reservation is already canceled", "Failure",
+							JOptionPane.ERROR_MESSAGE);
+					return;
+				} else if (reservation.getStatus() == ReservationStatus.CHECKED_IN) {
+					JOptionPane.showMessageDialog(null, "This reservation is already checked in", "Failure",
+							JOptionPane.ERROR_MESSAGE);
+					return;
+				} else if (reservation.getStatus() == ReservationStatus.CHECKED_OUT) {
+					JOptionPane.showMessageDialog(null, "This reservation is checked out", "Failure",
 							JOptionPane.ERROR_MESSAGE);
 					return;
 				}
@@ -488,7 +503,12 @@ public class AgentJFrame extends JFrame implements ActionListener{
 					JOptionPane.showMessageDialog(null, "This reservation is on hold", "Failure",
 							JOptionPane.ERROR_MESSAGE);
 					return;
+				} else if (reservation.getStatus() == ReservationStatus.CHECKED_OUT) {
+					JOptionPane.showMessageDialog(null, "This reservation is checked out", "Failure",
+							JOptionPane.ERROR_MESSAGE);
+					return;
 				}
+				
 				reservation.checkOut();
 				CleaningManager cleanerManager = ManagerManager.getCleaningManager();
 				String janitorFound = cleanerManager.findFreeJanitor();
@@ -782,7 +802,7 @@ public class AgentJFrame extends JFrame implements ActionListener{
 		updateUpperPanel();
 			
 		this.setTitle("Hotel");
-		this.setSize(1080, 720);
+		this.setSize(1280, 720);
 		this.setVisible(true);
 		this.setResizable(true);
 		this.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);

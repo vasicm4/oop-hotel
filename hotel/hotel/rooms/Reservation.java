@@ -90,11 +90,14 @@ public class Reservation {
 	}
 	
 	public void accept() {
+		if (this.status != ReservationStatus.ON_HOLD) {
+			return;
+		}
 		this.status = ReservationStatus.ACCEPTED;
 	}
 	
 	public boolean checkIn(Room room) {
-		if (this.room.getStatus() == RoomStatus.CLEANED) {
+		if (this.room.getStatus() == RoomStatus.CLEANED || this.room.getStatus() == RoomStatus.OCCUPIED || this.status != ReservationStatus.CHECKED_IN || this.status != ReservationStatus.CHECKED_OUT) {
 			return false;
 		}
 		this.room = room;
@@ -104,11 +107,17 @@ public class Reservation {
 	}
 	
 	public void checkOut() {
+		if (this.status != ReservationStatus.CHECKED_IN) {
+			return;
+		}
 		this.room.setStatus(RoomStatus.CLEANED);
 		this.status = ReservationStatus.CHECKED_OUT;
 	}
 	
 	public void reject() {
+		if (this.status != ReservationStatus.ON_HOLD) {
+			return;
+		}
 		this.status = ReservationStatus.REJECTED;
 	}
 	
@@ -189,6 +198,9 @@ public class Reservation {
 	}
 
 	public void cancel() {
+		if (this.status == ReservationStatus.CHECKED_IN || this.status == ReservationStatus.CHECKED_OUT) {
+			return;
+		}
 		this.setStatus(ReservationStatus.CANCELLED);
 	}
 }
