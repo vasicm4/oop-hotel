@@ -26,7 +26,7 @@ public class PriceListManager {
 		return instance;
 	}
 	
-	private PriceListManager() {
+	public PriceListManager() {
 		priceLists = new HashMap<String, PriceList>();
 		fileName = "priceLists.csv";
 		filePath = "data" + System.getProperty("file.separator");
@@ -40,18 +40,15 @@ public class PriceListManager {
 				return priceList;
 			}
 		}
-		System.out.println("Price list not found");
 		return null;
 	}
 	
 	public PriceList findRange(LocalDate startDate, LocalDate endDate) {
 		for (PriceList priceList : priceLists.values()) {
-			if (priceList.getStartDate().isBefore(startDate) && priceList.getEndDate().isAfter(endDate)
-					&& !priceList.isDeleted()) {
+			if (priceList.getStartDate().isBefore(endDate) && priceList.getEndDate().isAfter(startDate) && !priceList.isDeleted()) {
 				return priceList;
 			}
 		}
-		System.out.println("Price list not found");
 		return null;
 	}
 	
@@ -88,7 +85,11 @@ public class PriceListManager {
 	}
 	
 	public void remove(PriceList priceList) {
-		priceList.delete();
+		for (PriceList p : priceLists.values()) {
+			if (p.equals(priceList)) {
+				p.delete();
+			}
+		}
 	}
 	
 	public void writeServices(int id, HashMap<Service, Double> services) {

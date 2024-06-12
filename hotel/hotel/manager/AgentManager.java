@@ -54,13 +54,13 @@ public class AgentManager {
 	}
 	
 	public HashMap<String, Agent> getAvailableAgents() {
-		HashMap<String, Agent> agents = new HashMap<String, Agent>();
+		HashMap<String, Agent> availableAgents = new HashMap<String, Agent>();
 		for (Agent agent : this.agents.values()) {
-			if (agent.isDeleted() == false) {
-				agents.put(agent.getUsername(), agent);
+			if (!agent.isDeleted()) {
+				availableAgents.put(agent.getUsername(), agent);
 			}
 		}
-		return agents;
+		return availableAgents;
 	}
 	
 	public void add(String username, String password, String name, String surname, LocalDate dateOfBirth, int phoneNumber, Gender gender, Education education, int experience, double baseSalary) {
@@ -72,7 +72,11 @@ public class AgentManager {
 	}
 	
 	public void remove(Agent agent) {
-		agent.delete();
+		for (Agent a : agents.values()) {
+			if (a.equals(agent)) {
+				a.delete();
+			}
+		}
 	}
 	
 	public void readData() {

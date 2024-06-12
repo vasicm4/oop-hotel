@@ -1,5 +1,7 @@
 package hotel;
 
+import java.util.Objects;
+
 public class Service {
 	protected String type;
 	protected boolean deleted;
@@ -12,6 +14,14 @@ public class Service {
 	public Service(String type, boolean deleted) {
 		this.type = type;
 		this.deleted = deleted;
+	}
+	
+	public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Service service = (Service) o;
+        return deleted == service.deleted &&
+               Objects.equals(type, service.type);
 	}
 	
 	public String getType() {

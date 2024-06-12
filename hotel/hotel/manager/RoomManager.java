@@ -32,15 +32,6 @@ public class RoomManager {
 		filePath = "data/";
 	}
 	
-	public Room find( RoomType type) {
-		for (Room room : rooms.values()) {
-			if (room.getType().equals(type) && room.getStatus().equals(RoomStatus.AVAILABLE)) {
-				return room;
-			}
-		}
-		return null;
-	}
-	
 	public Room find(int number) {
 		if (rooms.containsKey(String.valueOf(number))) {
 			return rooms.get(String.valueOf(number));
@@ -90,15 +81,11 @@ public class RoomManager {
 	}
 	
 	public void remove(Room room) {
-		room.delete();
-	}
-	
-	public void update(Room room, RoomType type, int number, int floor, RoomStatus status) {
-		room.setType(type);
-		room.setNumber(number);
-		room.setFloor(floor);
-		room.setStatus(status);
-		
+		for (Room r : rooms.values()) {
+			if (r.equals(room)) {
+				r.delete();
+			}
+		}
 	}
 	
 	public ArrayList<String> findRoomTypes(ArrayList<String> additionalServices) {

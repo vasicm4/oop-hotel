@@ -66,11 +66,6 @@ public class CleaningManager {
 		janitorByDate.get(username).get(date).add(room);
 	}
 	
-	public void removeRoom(String username, String date, Room room) {
-		if (janitorByDate.containsKey(username) && janitorByDate.get(username).containsKey(date)) {
-			janitorByDate.get(username).get(date).remove(room);
-		}
-	}
 	
 	public ArrayList<Room> getRoomsByDate(String janitor,String date) {
 		return janitorByDate.get(janitor).get(date);

@@ -45,16 +45,11 @@ public class ReservationManager {
 		return String.valueOf(reservations.size() + 1);
 	}
 	
-	public void add(LocalDate CheckIn, LocalDate CheckOut, Room room, Guest guest, ArrayList<Service> services) {
-		this.reservations.put(this.generateId(), new Reservation(CheckIn, CheckOut, room, guest, services, this.generateId()));
-    }
-	
 	public void add(LocalDate CheckIn, LocalDate CheckOut, Room room, RoomType roomType, Guest guest, ArrayList<Service> services, ReservationStatus status, String id, boolean deleted) {
         this.reservations.put(id, new Reservation(CheckIn, CheckOut, room, roomType, guest, services, status, id, deleted));
 	}
 
-	public void add(LocalDate CheckIn, LocalDate CheckOut, RoomType roomType, Guest guest,
-ArrayList<Service> services, ReservationStatus status, boolean deleted) {
+	public void add(LocalDate CheckIn, LocalDate CheckOut, RoomType roomType, Guest guest, ArrayList<Service> services, ReservationStatus status, boolean deleted) {
 		String id = this.generateId();
 		this.reservations.put(id, new Reservation(CheckIn, CheckOut, roomType, guest, services, status, id, deleted));
 	}
@@ -72,7 +67,7 @@ ArrayList<Service> services, ReservationStatus status, boolean deleted) {
 	public ArrayList<Reservation> findReservations(LocalDate CheckIn,LocalDate CheckOut) {
 		ArrayList<Reservation> reservationsFound = new ArrayList<Reservation>();
 		for (Reservation reservation : reservations.values()) {
-			if (reservation.getCheckIn().compareTo(CheckIn)>0  && reservation.getCheckOut().compareTo(CheckOut)<0 && !reservation.isDeleted()) {
+			if (reservation.getCheckIn().compareTo(CheckIn)>=0  && reservation.getCheckOut().compareTo(CheckOut)<=0 && !reservation.isDeleted()) {
 				reservationsFound.add(reservation);
 			}
 		}
@@ -92,8 +87,8 @@ ArrayList<Service> services, ReservationStatus status, boolean deleted) {
 	public HashMap<String, Reservation> getDailyReservations(LocalDate date) {
 		HashMap<String, Reservation> reservationsFound = new HashMap<String, Reservation>();
 		for (Reservation reservation : reservations.values()) {
-			if (reservation.getStatus() == ReservationStatus.CHECKED_IN || reservation.getStatus() == ReservationStatus.CHECKED_OUT) {
-				if (reservation.getCheckIn().compareTo(date) == 0 && reservation.getCheckOut().compareTo(date) == 0) {
+			if (reservation.getStatus() == ReservationStatus.CHECKED_IN || reservation.getStatus() == ReservationStatus.CHECKED_OUT || reservation.getStatus() == ReservationStatus.ACCEPTED) {
+				if (reservation.getCheckIn().compareTo(date) == 0 || reservation.getCheckOut().compareTo(date) == 0) {
 					reservationsFound.put(reservation.getId(), reservation);
 				}
 			}
@@ -139,10 +134,6 @@ ArrayList<Service> services, ReservationStatus status, boolean deleted) {
         return null;
     }
 	
-	public Reservation getReservations(String id) {
-		return reservations.get(id);
-	}
-	
 	public int getOccupiedRooms(LocalDate date) {
 		int occupiedRooms = 0;
 		for (Reservation reservation : reservations.values()) {
@@ -156,7 +147,7 @@ ArrayList<Service> services, ReservationStatus status, boolean deleted) {
 	public Double getTotalEarnings(LocalDate startDate,LocalDate endDate) {
 		double totalEarnings = 0;
 		for (Reservation reservation : reservations.values()) {
-			if (reservation.getCheckIn().compareTo(startDate) >= 0 && reservation.getCheckOut().compareTo(endDate) <= 0) {
+			if (!reservation.getCheckIn().isBefore(startDate) && reservation.getCheckOut().isAfter(endDate) && !reservation.isDeleted() ) {
 				totalEarnings += reservation.getPrice(ManagerManager.getPriceListManager());
 			}
 		}

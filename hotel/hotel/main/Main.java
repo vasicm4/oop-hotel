@@ -1,7 +1,7 @@
 package main;
 
 import manager.ManagerManager;
-import view.AdminJFrame;
+import view.LoginJFrame;
 
 public class Main {
 	
@@ -11,9 +11,9 @@ public class Main {
 		
 		
 //		GuestJFrame guestJFrame = new GuestJFrame(managerManager, "milicam@gmail.com");
-		AdminJFrame adminJFrame = new AdminJFrame(managerManager);
+//		AdminJFrame adminJFrame = new AdminJFrame(managerManager);
 //		AgentJFrame agentJFrame = new AgentJFrame(managerManager);
 //		JanitorJFrame janitorJFrame = new JanitorJFrame(managerManager, "janaj");
-//		LoginJFrame frame = new LoginJFrame(managerManager);
+		LoginJFrame frame = new LoginJFrame(managerManager);
 	}
 }

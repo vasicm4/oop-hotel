@@ -1,6 +1,7 @@
 package users;
 
 import java.time.LocalDate;
+import java.util.Objects;
 
 abstract class User {
 	protected String username;
@@ -33,6 +34,21 @@ abstract class User {
 		this.deleted = deleted;
 	}
 	
+	@Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        User user = (User) o;
+        return phoneNumber == user.phoneNumber &&
+               deleted == user.deleted &&
+               Objects.equals(username, user.username) &&
+               Objects.equals(password, user.password) &&
+               Objects.equals(name, user.name) &&
+               Objects.equals(surname, user.surname) &&
+               Objects.equals(dateOfBirth, user.dateOfBirth) &&
+               gender == user.gender;
+    }
+	 
 	public String toString() {
 		return this.username + "," + this.password + "," + this.name + "," + this.surname + "," + this.dateOfBirth + "," + this.phoneNumber + "," + this.gender + "," + this.deleted;
 	}

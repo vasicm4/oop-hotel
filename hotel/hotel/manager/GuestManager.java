@@ -45,13 +45,13 @@ public class GuestManager {
 	}
 	
 	public HashMap<String, Guest> getAvailableGuests(){
-		HashMap<String, Guest> guests = new HashMap<String, Guest>();
+		HashMap<String, Guest> availableGuests = new HashMap<String, Guest>();
 		for (Guest guest : this.guests.values()) {
-			if (guest.isDeleted() == false) {
-				guests.put(guest.getUsername(), guest);
+			if (!guest.isDeleted()) {
+				availableGuests.put(guest.getUsername(), guest);
 			}
 		}
-		return guests;
+		return availableGuests;
 	}
 	
 	public void add(String username, String password, String name, String surname, LocalDate dateOfBirth, int phoneNumber, Gender gender) {
@@ -63,7 +63,11 @@ public class GuestManager {
 	}
 	
 	public void remove(Guest guest) {
-		guest.delete();
+		for (Guest g : guests.values()) {
+			if (g.equals(guest)) {
+				g.setDeleted(true);
+			}
+		}
 	}
 	
 	public void readData() {

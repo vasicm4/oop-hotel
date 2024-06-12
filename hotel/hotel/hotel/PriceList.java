@@ -50,6 +50,14 @@ public class PriceList {
 		return result;
 	}
 	
+	public boolean equals(Object o) {
+		if (o instanceof PriceList) {
+			PriceList priceList = (PriceList) o;
+			return this.startDate.equals(priceList.getStartDate()) && this.endDate.equals(priceList.getEndDate()) && this.services.equals(priceList.getServices()) && this.roomPrices.equals(priceList.getRoomPrices()) && this.deleted == priceList.isDeleted() && this.id == priceList.getId();
+		}
+		return false;
+	}
+	
 	public int getId() {
 		return id;
 	}

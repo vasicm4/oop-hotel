@@ -20,7 +20,7 @@ public class RoomTypeManager {
 		return instance;
 	}
 	
-	private RoomTypeManager() {
+	public RoomTypeManager() {
 		roomTypes = new HashMap<String, RoomType>();
 		fileName = "roomTypes.csv";
 		filePath = "data" + System.getProperty("file.separator");
@@ -28,6 +28,14 @@ public class RoomTypeManager {
 		
 	public RoomType get(String roomType) {
 		return roomTypes.get(roomType);
+	}
+	
+	public RoomType getAvailable(String roomType) {
+		if (roomTypes.containsKey(roomType) && !roomTypes.get(roomType).isDeleted()) {
+			return roomTypes.get(roomType);
+		} else {
+			return null;
+		}
 	}
 	
 	public HashMap<String, RoomType> getAvailableRoomTypes() {
@@ -48,8 +56,12 @@ public class RoomTypeManager {
 		roomTypes.put(type, new RoomType(type, number, deleted));
 	}
 	
-	public void remove(String type) {
-		roomTypes.remove(type);
+	public void remove(RoomType roomType) {
+		for (RoomType room : roomTypes.values()) {
+			if (room.equals(roomType)) {
+				room.delete();
+			}
+		}
 	}
 	
 	public void change(String type, int number) {

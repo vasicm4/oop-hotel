@@ -46,13 +46,13 @@ public class AdminManager {
 	}
 	
 	public HashMap<String, Admin> getAvailableAdmins() {
-        HashMap<String, Admin> admins = new HashMap<String, Admin>();
+        HashMap<String, Admin> availableAdmins = new HashMap<String, Admin>();
         for (Admin admin : this.admins.values()) {
-            if (admin.isDeleted() == false) {
-                admins.put(admin.getUsername(), admin);
+            if (!admin.isDeleted()) {
+            	availableAdmins.put(admin.getUsername(), admin);
             }
         }
-        return admins;
+        return availableAdmins;
     }
 
 	public void add(String username, String password, String name, String surname, LocalDate dateOfBirth, int phoneNumber, Gender gender, Education education, int experience, double baseSalary) {
@@ -64,15 +64,13 @@ public class AdminManager {
 	}
 	
 	public void remove(Admin admin) {
-		admin.delete();
-	}
-	
-	public void remove(String username) {
-		Admin admin = this.find(username);
-		if (admin != null) {
-			admin.delete();
+		for (Admin a : admins.values()) {
+			if (a.equals(admin)) {
+				a.delete();
+			}
 		}
 	}
+	
 	
 	public double calculateAllSalaries() {
 		double sum = 0;

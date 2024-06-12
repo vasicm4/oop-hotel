@@ -58,7 +58,11 @@ public class ServiceManager {
 	}
 
 	public void remove(Service service) {
-		service.delete();
+		for (Service s : services.values()) {
+			if (s.equals(service)) {
+				s.delete();
+			}
+		}
 	}
 	
 	public void readData() {

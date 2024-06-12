@@ -54,13 +54,13 @@ public class JanitorManager {
 	}
 	
 	public HashMap<String, Janitor> getAvailableJanitors() {
-		HashMap<String, Janitor> janitors = new HashMap<String, Janitor>();
+		HashMap<String, Janitor> availableJanitors = new HashMap<String, Janitor>();
 		for (Janitor janitor : this.janitors.values()) {
-			if (janitor.isDeleted() == false) {
-				janitors.put(janitor.getUsername(), janitor);
+			if (!janitor.isDeleted()) {
+				availableJanitors.put(janitor.getUsername(), janitor);
 			}
 		}
-		return janitors;
+		return availableJanitors;
 	}
 	
 	public void add(String username, String password, String name, String surname, LocalDate dateOfBirth, int phoneNumber, Gender gender, Education education, int experience, double baseSalary) {
@@ -72,7 +72,11 @@ public class JanitorManager {
 	}
 	
 	public void remove(Janitor janitor) {
-		janitor.delete();
+		for (Janitor j : janitors.values()) {
+			if (j.equals(janitor)) {
+				j.delete();
+			}
+		}
 	}
 	
 	public void readData() {

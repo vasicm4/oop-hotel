@@ -1,6 +1,9 @@
 package rooms;
 
 import java.util.ArrayList;
+import java.util.Objects;
+
+import hotel.Service;
 
 public class Room {
 	protected RoomType type;
@@ -26,6 +29,15 @@ public class Room {
 		this.status = status;
 		this.additionalServices = additionalServices;
 		this.deleted = deleted;
+	}
+	
+	public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Room room = (Room) o;
+		return number == room.number && floor == room.floor && deleted == room.deleted
+				&& Objects.equals(type, room.type) && status == room.status
+				&& Objects.equals(additionalServices, room.additionalServices);
 	}
 
 	public ArrayList<String> getAdditionalServices() {
@@ -88,21 +100,4 @@ public class Room {
 	public String toString() {
 		return "Number: " + number + ", Type: " + type;
 	}
-	
-	@Override
-	public boolean equals(Object obj) {
-		if (obj == this) {
-			return true;
-		}
-
-		if (!(obj instanceof Room)) {
-			return false;
-		}
-
-		Room room = (Room) obj;
-		return room.number == number && room.floor == floor;
-	}
-	
-	
-	
 }

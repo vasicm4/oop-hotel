@@ -1,5 +1,9 @@
 package rooms;
 
+import java.util.Objects;
+
+import hotel.Service;
+
 public class RoomType {
 	
 	protected String type;
@@ -16,6 +20,14 @@ public class RoomType {
 		this.type = type;
 		this.capacity = capacity;
 		this.deleted = deleted;
+	}
+	
+	public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        RoomType roomType = (RoomType) o;
+		return capacity == roomType.capacity && deleted == roomType.deleted 
+				&& Objects.equals(type, roomType.type);
 	}
 	
 	public void setType(String type) {
@@ -46,7 +58,4 @@ public class RoomType {
 	public String toString() {
 		return this.type;
 	}
-	
-	
-	
 }

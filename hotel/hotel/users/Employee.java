@@ -22,6 +22,17 @@ public class Employee extends User{
 	}
 	
 	@Override
+	public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Employee employee = (Employee) o;
+        if (super.equals(o) && educationLevel == employee.educationLevel && experience == employee.experience && baseSalary == employee.baseSalary) {
+        	return true;
+        }
+        return false;
+	}
+	
+	@Override
 	public String toString() {
 		return super.toString() + "," + this.educationLevel + "," + this.experience + "," + this.baseSalary;
 	}
