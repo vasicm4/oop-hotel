@@ -146,7 +146,7 @@ public class ReservationManager {
 	public Double getTotalEarnings(LocalDate startDate,LocalDate endDate) {
 		double totalEarnings = 0;
 		for (Reservation reservation : reservations.values()) {
-			if (!reservation.getCheckIn().isBefore(startDate) && reservation.getCheckOut().isAfter(endDate) && !reservation.isDeleted() ) {
+			if (!reservation.getCheckIn().isBefore(startDate) && !reservation.getCheckOut().isAfter(endDate) && !reservation.isDeleted() ) {
 				totalEarnings += reservation.getPrice(ManagerManager.getPriceListManager());
 			}
 		}

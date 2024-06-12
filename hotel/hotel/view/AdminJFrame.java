@@ -816,6 +816,10 @@ public class AdminJFrame extends JFrame implements ActionListener{
 			date.setLayout(new GridLayout(1, 3));
 			earningsFrame.add(date);
 			date.setBorder(javax.swing.BorderFactory.createTitledBorder("Date"));
+			JComboBox<String> year = new JComboBox<String>();
+			for (int i = 2023; i < 2025; i++) {
+				year.addItem(String.valueOf(i));
+			}
 			JComboBox<String> month = new JComboBox<String>();
 			for (int i = 1; i <= 12; i++) {
 				if (i < 10) {
@@ -823,10 +827,6 @@ public class AdminJFrame extends JFrame implements ActionListener{
 				} else {
 					month.addItem(String.valueOf(i));
 				}
-			}
-			JComboBox<String> year = new JComboBox<String>();
-			for (int i = 2023; i <= 2025; i++) {
-				year.addItem(String.valueOf(i));
 			}
 			date.add(month);
 			date.add(year);
