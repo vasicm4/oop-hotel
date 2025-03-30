@@ -4,7 +4,14 @@ OOP Hotel is an information system software built for a hotel that solves major 
 
 ***
 ## 🔧 Technologies
-
+![Java](https://img.shields.io/badge/Java-17-orange?style=flat-square&logo=java)
+![Swing](https://img.shields.io/badge/Library-Swing-blue?style=flat-square)
+![XChart](https://img.shields.io/badge/Library-xchart-blue)
+![Platform](https://img.shields.io/badge/Platform-Windows_|_Linux_|_MacOS-lightgrey?style=flat-square)
+![Version](https://img.shields.io/badge/Version-1.0-brightgreen?style=flat-square)
+![Status](https://img.shields.io/badge/Status-Active-brightgreen?style=flat-square)
+![License](https://img.shields.io/badge/License-MIT-blue?style=flat-square)
+![Contributions](https://img.shields.io/badge/Contributions-Welcome-brightgreen?style=flat-square)
 
 
 ***
