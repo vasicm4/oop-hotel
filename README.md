@@ -1,4 +1,4 @@
-# OOP Hotel
+# 🏨 OOP Hotel
 
 OOP Hotel is an information system software built for a hotel that solves major issues related to management of medium scale organizations. 
 
