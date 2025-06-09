@@ -3,7 +3,7 @@
 OOP Hotel is an information system software built for a hotel that solves major issues related to management of medium scale organizations. 
 
 ***
-## 🔧 Technologies
+## Technologies
 ![Java](https://img.shields.io/badge/Java-17-orange?style=flat-square&logo=java)
 ![Swing](https://img.shields.io/badge/Library-Swing-blue?style=flat-square)
 ![XChart](https://img.shields.io/badge/Library-xchart-blue)
@@ -13,7 +13,7 @@ OOP Hotel is an information system software built for a hotel that solves major 
 
 
 ***
-## 📋 Contents
+## Contents
 1. [Specifications](#specifications)
 2. [Dependencies](#dependencies)
 3. [Getting Started](#start)
@@ -21,23 +21,23 @@ OOP Hotel is an information system software built for a hotel that solves major 
 5. [Contact](#contact)
 ***
 <a name="specifications"><a/>
-## 📌 Specifications:
+## Specifications:
 
-#### 🧍 Users: 
+#### Users: 
 There are multiple types of users including administrator, receptionist/agent, janitor and guest, every one of them can perform unique set of operations related to their respective role, for example administrators can perform CRUD operations on whole set of entities, receptionsts can manage guests and rooms, while janitors are able to check rooms whether they are clean or not.
 
-#### 📁 Hotel Organization: 
+#### Hotel Organization: 
 Entities related to hotel organization are rooms, room types, reservations, price lists and additional services, where rooms can be free or occupied, dirty or cleaned, reservations can be either on hold, accepted, rejected or canceled, every reservation is related to date, room type and additional services chosen by guest. They can be managed by both administrators and receptionsts. Price lists are made by administrators, prices are defined for every room type, additional services are chosen by either existing users or receptionsts. Additional services include breakfast, lunch, dinner, drinks, spa, pool, massages, etc. 
 
-#### 💻 GUI:
+#### GUI:
 The graphical user interface (GUI) is built using Swing. After logging in, each user type is presented with a personalized menu featuring the previously mentioned functionalities. Additionally, users have access to interactive charts displaying key hotel metrics, including income trends over the past 12 months, reservation statuses, janitor occupancy rates. This enhances usability and provides valuable insights at a glance.
 
-#### 🧪 Unit Testing: 
+#### Unit Testing: 
 To ensure the proper functionality of the information system, I implemented a set of tests that helped validate its performance and reliability.
 
 ***
 <a name="dependencies"><a/>
-## ⚒️ Dependencies
+## Dependencies
 In order to run this project properly you need to make sure that you have installed:
 1. **Java Development Kit (JDK) - Version 17**: distribution of Java technology by Oracle Corporation
 2. **JUnit 5 Library**: modern foundation for developer-side testing on the JVM
@@ -47,7 +47,7 @@ In order to run this project properly you need to make sure that you have instal
 
 ***
 <a name="start"><a/>
-## 🚀 Getting Started
+## Getting Started
 
 1. **Clone the Repository**:
    Open a terminal and run the following command to clone the repository:
@@ -89,12 +89,12 @@ Alternatively, download the repository as a ZIP file and extract it.
 
 ***
 <a name="license"><a/>
-## ⚖️ License
+## License
 This project is licensed under the [MIT License](./LICENSE). See the [LICENSE](./LICENSE) file for details.
 
 ***
 <a name="contact"><a/>
-## ☎️ Contact me
+## Contact me
 
  - **Email**: [vasicmaksim4@gmail.com](mailto:vasicmaksim4@gmail.com)
  - **Github**: [vasicm4](https://github.com/vasicm4)
